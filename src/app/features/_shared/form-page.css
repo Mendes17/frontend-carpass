@@ -1,0 +1,130 @@
+/* Estilos comuns às telas de formulário. */
+
+.form-card {
+  max-width: 900px;
+}
+
+.form-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cp-text);
+  margin-bottom: 4px;
+}
+
+.form-section-hint {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+  margin-bottom: 20px;
+}
+
+.section-divider {
+  margin: 28px 0 20px;
+  border: none;
+  border-top: 1px solid var(--cp-border);
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+  margin-top: 4px;
+}
+
+/*
+ * Valor que a tela mostra mas o formulário não edita (saldo de estoque, por
+ * exemplo). Fica com a mesma altura de um campo para a grade não desalinhar,
+ * sem parecer um campo desabilitado — o que sugeriria que dá para editar.
+ */
+.readonly-stock {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cp-text);
+}
+
+/* ------------------------------------------- origem do veículo (FIPE) */
+
+/*
+ * O bloco que decide entre escolher da FIPE e digitar à mão.
+ *
+ * Ele ocupa a linha inteira da grade porque o nome do modelo é longo —
+ * "ARGO DRIVE 1.3 8V Flex" e coisas piores — e dividir espaço com um campo de
+ * duas palavras espremeria justamente o que precisa ser lido.
+ */
+.veiculo-origem {
+  padding: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg);
+}
+
+.origem-topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* A troca de caminho é discreta: é uma alternativa, não a ação principal. */
+.origem-troca {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.veiculo-origem .two-up {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* A regra de espaçamento entre campos empilhados não vale lado a lado: ela
+   empurraria o segundo campo para baixo e desalinharia os rótulos. */
+.veiculo-origem .two-up .cp-field + .cp-field {
+  margin-top: 0;
+}
+
+/*
+ * O resumo da escolha existe para a pessoa ver o que vai ser salvo. Sem ele, o
+ * seletor fecha e os campos preenchidos ficam escondidos atrás da cascata.
+ */
+.escolhido {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.escolhido strong {
+  color: var(--cp-text);
+}
+
+.escolhido mat-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  color: var(--cp-success);
+  flex: 0 0 auto;
+}
+
+.escolhido .codigo {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: var(--cp-neutral-bg);
+  color: var(--cp-neutral-fg);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .veiculo-origem .two-up {
+    grid-template-columns: 1fr;
+  }
+}

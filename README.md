@@ -1,59 +1,52 @@
-# CarpassWeb
+# CarPass — Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
+Painel da oficina. Angular 20 com componentes standalone, signals e change detection zoneless.
 
-## Development server
-
-To start a local development server, run:
+## Rodando
 
 ```bash
-ng serve
+npm install
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+A aplicação sobe em `http://localhost:4200` e fala com a API em `http://localhost:8080/api/v1`.
 
-## Code scaffolding
+Se a API estiver em outro endereço, ajuste `src/environments/environment.ts`. Em produção o endereço é relativo (`/api/v1`), então o mesmo bundle serve qualquer domínio.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+> A origem `http://localhost:4200` precisa estar em `CARPASS_ALLOWED_ORIGINS` no `.env` do backend. A API recusa curinga no CORS de propósito.
 
-```bash
-ng generate component component-name
+## Estrutura
+
+```
+src/app/
+├── core/
+│   ├── models/        contratos da API (espelham os DTOs do backend)
+│   ├── api/           um serviço HTTP por recurso
+│   ├── auth/          sessão, guardas de rota
+│   ├── http/          interceptors e tratamento de erro
+│   └── services/      tema e notificações
+├── layout/            moldura das telas autenticadas
+├── features/          uma pasta por tela
+└── shared/components/ peças reutilizáveis
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Convenções
 
-```bash
-ng generate --help
-```
+- **Endereço da API em um lugar só.** Nenhum serviço monta URL com string solta. O interceptor decide se injeta o token comparando com `environment.apiUrl`, e não procurando `localhost` no endereço — era por isso que o token parava de ir fora da máquina do desenvolvedor.
+- **Erro tem dono.** O interceptor global cuida do que é sempre igual: sessão expirada derruba o login, 403 e falha de servidor viram aviso. Erro de negócio e de validação seguem para a tela, que sabe onde exibi-los.
+- **A tela não inventa permissão.** O menu esconde o que o papel não alcança e o `roleGuard` evita a navegação, mas quem decide é o backend. Isso é conveniência, não segurança.
+- **Ações da OS vêm do servidor.** O backend devolve `allowedNextStatuses`; a tela oferece só isso, em vez de recriar a máquina de estados no cliente e divergir dela.
+- **Fontes auto-hospedadas.** Roboto e Material Icons vêm dos pacotes `@fontsource/roboto` e `material-icons`. Sem chamada ao Google no carregamento: menos uma dependência externa, sem texto piscando e sem expor o IP de quem acessa a um terceiro.
 
-## Building
+## Tema e acessibilidade
 
-To build the project run:
+O tema claro/escuro vive em `src/custom-theme.scss`, em variáveis CSS `--cp-*`. Cada estado tem duas cores com papéis diferentes:
 
-```bash
-ng build
-```
+| Token | Papel | Contraste exigido |
+|---|---|---|
+| `--cp-<estado>` | marca: ícone, barra, borda | ≥ 3:1 contra o cartão |
+| `--cp-<estado>-fg` | texto sobre o fundo tingido | ≥ 4,5:1 contra `--cp-<estado>-bg` |
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Os valores de texto foram medidos, não escolhidos no olho. Os originais reprovavam: verde em 2,41:1 e amarelo em 2,07:1 sobre o próprio fundo. O modo escuro tem passos próprios, medidos contra as superfícies escuras — não é a inversão automática do claro.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Outras decisões: cor nunca identifica um estado sozinha (o rótulo textual acompanha sempre), há link para pular ao conteúdo, `prefers-reduced-motion` desliga as animações, e a barra lateral fecha com `Esc`.

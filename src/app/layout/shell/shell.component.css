@@ -1,0 +1,41 @@
+.layout {
+  min-height: 100vh;
+  background: var(--cp-bg);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  /* Abre espaço para a barra lateral fixa. */
+  margin-inline-start: var(--cp-sidebar-width);
+}
+
+.content {
+  flex: 1;
+  padding: 24px;
+  /* min-width: 0 impede que uma tabela larga estoure a coluna. */
+  min-width: 0;
+}
+.content:focus {
+  outline: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 25;
+}
+
+@media (max-width: 1023px) {
+  .column {
+    margin-inline-start: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding: 16px;
+  }
+}

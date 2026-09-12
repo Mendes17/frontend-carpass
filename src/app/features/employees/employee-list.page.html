@@ -1,0 +1,127 @@
+<cp-page-header title="Equipe" subtitle="Quem trabalha na oficina e quem tem acesso ao sistema.">
+  <a routerLink="/equipe/novo" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Novo funcionário
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por nome, especialidade ou e-mail" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onRoleFilter($event)" aria-label="Filtrar por cargo">
+    <option value="">Todos os cargos</option>
+    @for (role of roles; track role.value) {
+      <option [value]="role.value">{{ role.label }}</option>
+    }
+  </select>
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativos</option>
+    <option value="false">Somente inativos</option>
+    <option value="">Todos</option>
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="badge"
+      title="Nenhum funcionário encontrado"
+      description="Ajuste os filtros ou cadastre a primeira pessoa da equipe."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Cargo</th>
+            <th scope="col">Contato</th>
+            <th scope="col">Acesso</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (employee of page().content; track employee.id) {
+            <tr [class.inactive-row]="!employee.active">
+              <td data-label="Nome">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ employee.name }}</span>
+                  @if (employee.specialty) {
+                    <span class="secondary-text">{{ employee.specialty }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Cargo">{{ employee.roleLabel }}</td>
+              <td data-label="Contato">
+                <span class="primary-cell">
+                  <span>{{ employee.phone || '—' }}</span>
+                  @if (employee.email) {
+                    <span class="secondary-text">{{ employee.email }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Acesso">
+                @if (employee.hasSystemAccess) {
+                  <!-- Tom informativo, nao "done": verde aqui competiria com o
+                       verde de "Ativo" na coluna ao lado e as duas viravam a
+                       mesma mancha de cor. -->
+                  <span class="cp-badge cp-badge-progress">
+                    <span class="cp-badge-dot" aria-hidden="true"></span>
+                    Com acesso
+                  </span>
+                } @else {
+                  <span class="cp-badge cp-badge-neutral">
+                    <span class="cp-badge-dot" aria-hidden="true"></span>
+                    Sem acesso
+                  </span>
+                }
+              </td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="employee.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ employee.active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  @if (!employee.hasSystemAccess && employee.active) {
+                    <button type="button" class="icon-action" (click)="grantAccess(employee)"
+                            [attr.aria-label]="'Dar acesso ao sistema para ' + employee.name">
+                      <mat-icon aria-hidden="true">key</mat-icon>
+                    </button>
+                  }
+                  <button type="button" class="icon-action" (click)="edit(employee)"
+                          [attr.aria-label]="'Editar ' + employee.name">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(employee)"
+                          [attr.aria-label]="(employee.active ? 'Desativar ' : 'Reativar ') + employee.name">
+                    <mat-icon aria-hidden="true">{{ employee.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

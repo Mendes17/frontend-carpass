@@ -1,0 +1,31 @@
+<div class="auth">
+  <!-- Painel de marca: some no mobile para o formulário ficar acima da dobra. -->
+  <section class="brand-panel" aria-hidden="true">
+    <div class="brand-content">
+      <div class="brand-mark">
+        <mat-icon class="brand-icon">commute</mat-icon>
+        <span class="brand-name">CarPass</span>
+      </div>
+      <h2 class="brand-headline">A oficina inteira em um lugar só</h2>
+      <p class="brand-text">
+        Clientes, veículos, ordens de serviço, orçamento, estoque e o histórico completo de cada
+        carro que passa pela sua oficina.
+      </p>
+    </div>
+  </section>
+
+  <section class="form-panel">
+    <button
+      type="button"
+      class="theme-toggle"
+      (click)="theme.toggle()"
+      [attr.aria-label]="theme.theme() === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'"
+    >
+      <mat-icon aria-hidden="true">{{ theme.theme() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+
+    <main class="form-wrap animate-fade-in">
+      <router-outlet />
+    </main>
+  </section>
+</div>

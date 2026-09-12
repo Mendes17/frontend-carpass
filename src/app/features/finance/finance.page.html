@@ -1,0 +1,310 @@
+<cp-page-header
+  title="Financeiro"
+  [subtitle]="periodLabel() ? 'Resultado de ' + periodLabel() + '.' : 'Faturamento, despesas e resultado da oficina.'">
+  @if (summary()) {
+    <a [routerLink]="['/financeiro/imprimir']" [queryParams]="printParams()" class="cp-btn cp-btn-secondary">
+      <mat-icon aria-hidden="true">print</mat-icon>
+      Imprimir
+    </a>
+  }
+  <a routerLink="/despesas" class="cp-btn cp-btn-secondary">
+    <mat-icon aria-hidden="true">receipt_long</mat-icon>
+    Despesas
+  </a>
+</cp-page-header>
+
+<!-- ================================================= seletor de período -->
+<section class="periodo" aria-label="Período">
+  <div class="modo" role="radiogroup" aria-label="Ver por mês ou por ano">
+    <button type="button" class="modo-opcao" [class.selected]="mode() === 'MONTH'"
+            role="radio" [attr.aria-checked]="mode() === 'MONTH'" (click)="setMode('MONTH')">
+      Mês
+    </button>
+    <button type="button" class="modo-opcao" [class.selected]="mode() === 'YEAR'"
+            role="radio" [attr.aria-checked]="mode() === 'YEAR'" (click)="setMode('YEAR')">
+      Ano
+    </button>
+  </div>
+
+  <!--
+    As setas ficam ao lado do seletor porque comparar meses vizinhos é o gesto
+    mais frequente desta tela; sem elas, cada passo vira uma caçada dentro de
+    um select de vinte itens.
+  -->
+  <div class="navegacao">
+    @if (mode() === 'MONTH') {
+      <button type="button" class="passo" [disabled]="!canStep(1)" (click)="stepMonth(1)"
+              aria-label="Mês anterior">
+        <mat-icon aria-hidden="true">chevron_left</mat-icon>
+      </button>
+
+      <select class="cp-select periodo-select" [value]="monthKey()" (change)="onMonthChange($event)"
+              aria-label="Escolher mês">
+        @for (opcao of periods().months; track opcao.year + '-' + opcao.month) {
+          <option [value]="opcao.year + '-' + opcao.month">{{ opcao.label }}</option>
+        }
+      </select>
+
+      <button type="button" class="passo" [disabled]="!canStep(-1)" (click)="stepMonth(-1)"
+              aria-label="Próximo mês">
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+    } @else {
+      <button type="button" class="passo" [disabled]="!canStepYear(1)" (click)="stepYear(1)"
+              aria-label="Ano anterior">
+        <mat-icon aria-hidden="true">chevron_left</mat-icon>
+      </button>
+
+      <select class="cp-select periodo-select" [value]="selectedYear()" (change)="onYearChange($event)"
+              aria-label="Escolher ano">
+        @for (ano of periods().years; track ano) {
+          <option [value]="ano">{{ ano }}</option>
+        }
+      </select>
+
+      <button type="button" class="passo" [disabled]="!canStepYear(-1)" (click)="stepYear(-1)"
+              aria-label="Próximo ano">
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+    }
+  </div>
+</section>
+
+@if (errorMessage()) {
+  <section class="cp-card" role="alert">
+    <p style="margin: 0">{{ errorMessage() }}</p>
+    <button type="button" class="cp-btn cp-btn-ghost" style="margin-top: 12px" (click)="load()">
+      Tentar de novo
+    </button>
+  </section>
+} @else if (loading()) {
+  <div class="cp-grid cp-grid-stats">
+    @for (item of [1, 2, 3, 4]; track item) {
+      <cp-skeleton height="112px" />
+    }
+  </div>
+  <div style="height: 16px"></div>
+  <cp-skeleton height="280px" />
+} @else if (summary(); as resumo) {
+  <!-- ============================================== cartões principais -->
+  <div class="cp-grid cp-grid-stats">
+    <article class="cartao">
+      <div class="cartao-topo">
+        <span class="cartao-rotulo">Faturamento bruto</span>
+        <mat-icon class="cartao-icone bruto" aria-hidden="true">payments</mat-icon>
+      </div>
+      <strong class="cartao-valor">{{ resumo.grossRevenue | currency: 'BRL' }}</strong>
+      @if (grossChange(); as variacao) {
+        <span class="variacao" [class.sobe]="variacao >= 0" [class.desce]="variacao < 0">
+          <mat-icon aria-hidden="true">{{ variacao >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+          {{ variacao >= 0 ? '+' : '' }}{{ variacao | number: '1.0-1' }}% ante {{ monthly()!.previousLabel }}
+        </span>
+      } @else {
+        <span class="cartao-dica">Soma das ordens entregues no período.</span>
+      }
+    </article>
+
+    <article class="cartao">
+      <div class="cartao-topo">
+        <span class="cartao-rotulo">Despesas</span>
+        <mat-icon class="cartao-icone despesa" aria-hidden="true">shopping_cart</mat-icon>
+      </div>
+      <strong class="cartao-valor">{{ resumo.expenses | currency: 'BRL' }}</strong>
+      @if (expenseChange(); as variacao) {
+        <!-- Despesa que sobe não é boa notícia: aqui a seta para cima é o alerta. -->
+        <span class="variacao" [class.sobe]="variacao < 0" [class.desce]="variacao >= 0">
+          <mat-icon aria-hidden="true">{{ variacao >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+          {{ variacao >= 0 ? '+' : '' }}{{ variacao | number: '1.0-1' }}% ante {{ monthly()!.previousLabel }}
+        </span>
+      } @else {
+        <span class="cartao-dica">
+          {{ resumo.expenseCount }} {{ resumo.expenseCount === 1 ? 'lançamento' : 'lançamentos' }} no período.
+        </span>
+      }
+    </article>
+
+    <article class="cartao destaque">
+      <div class="cartao-topo">
+        <span class="cartao-rotulo">Faturamento líquido</span>
+        <mat-icon class="cartao-icone" aria-hidden="true">account_balance_wallet</mat-icon>
+      </div>
+      <!-- O sinal precisa aparecer: mês no vermelho não pode parecer um mês
+           qualquer com um número menor. -->
+      <strong class="cartao-valor" [class.negativo]="resumo.netRevenue < 0">
+        {{ resumo.netRevenue | currency: 'BRL' }}
+      </strong>
+      @if (netChange(); as variacao) {
+        <span class="variacao" [class.sobe]="variacao >= 0" [class.desce]="variacao < 0">
+          <mat-icon aria-hidden="true">{{ variacao >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+          {{ variacao >= 0 ? '+' : '' }}{{ variacao | number: '1.0-1' }}% ante {{ monthly()!.previousLabel }}
+        </span>
+      } @else {
+        <span class="cartao-dica">Bruto menos despesas.</span>
+      }
+    </article>
+
+    <article class="cartao">
+      <div class="cartao-topo">
+        <span class="cartao-rotulo">Ordens faturadas</span>
+        <mat-icon class="cartao-icone" aria-hidden="true">receipt_long</mat-icon>
+      </div>
+      <strong class="cartao-valor">{{ resumo.orderCount }}</strong>
+      <span class="cartao-dica">
+        @if (resumo.orderCount > 0) {
+          Ticket médio de {{ resumo.grossRevenue / resumo.orderCount | currency: 'BRL' }}.
+        } @else {
+          Nenhuma ordem entregue no período.
+        }
+      </span>
+    </article>
+  </div>
+
+  <!-- ======================================================== gráficos -->
+  <div class="cp-grid cp-grid-2" style="margin-top: 16px">
+    <section class="cp-card painel">
+      <h2 class="secao-titulo">Faturamento e despesas</h2>
+      <p class="secao-dica">
+        @if (mode() === 'MONTH') {
+          Os seis meses até {{ monthly()!.label }}, para dar contexto ao mês escolhido.
+        } @else {
+          Mês a mês em {{ annual()!.year }}.
+        }
+      </p>
+      <cp-money-chart
+        [points]="chartGrossExpense()"
+        [series]="serieBrutoEDespesa"
+        caption="Faturamento bruto e despesas por mês"
+      />
+    </section>
+
+    <section class="cp-card painel">
+      <h2 class="secao-titulo">Resultado</h2>
+      <p class="secao-dica">Bruto menos despesas. Abaixo da linha, o mês fechou no vermelho.</p>
+      <cp-money-chart
+        [points]="chartNet()"
+        [series]="serieLiquido"
+        caption="Faturamento líquido por mês"
+      />
+    </section>
+  </div>
+
+  <div class="cp-grid cp-grid-2" style="margin-top: 16px">
+    <!-- ============================================ gastos por categoria -->
+    <section class="cp-card painel">
+      <h2 class="secao-titulo">Para onde foi o dinheiro</h2>
+      <p class="secao-dica">Despesas do período por categoria, da maior para a menor.</p>
+
+      @if (byCategory().length) {
+        <table class="categorias">
+          <caption class="cp-visually-hidden">Despesas por categoria</caption>
+          <thead class="cp-visually-hidden">
+            <tr>
+              <th scope="col">Categoria</th>
+              <th scope="col">Fatia</th>
+              <th scope="col">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (categoria of byCategory(); track categoria.categoryId) {
+              <tr>
+                <th scope="row" class="categoria-nome" [title]="categoria.categoryName">
+                  {{ categoria.categoryName }}
+                </th>
+                <td class="categoria-barra">
+                  <span class="trilho" aria-hidden="true">
+                    <span class="preenchimento" [style.width.%]="categoria.share"></span>
+                  </span>
+                  <span class="categoria-fatia">{{ categoria.share | number: '1.0-1' }}%</span>
+                </td>
+                <td class="categoria-valor">{{ categoria.amount | currency: 'BRL' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <cp-empty-state
+          icon="savings"
+          title="Nenhuma despesa no período"
+          description="Lance os gastos da oficina para o resultado líquido contar a história inteira."
+        />
+        <a routerLink="/despesas/nova" class="cp-btn cp-btn-secondary" style="margin: 0 auto; display: block; width: fit-content">
+          Lançar despesa
+        </a>
+      }
+    </section>
+
+    <!-- ============================================= extremos do ano -->
+    <section class="cp-card painel">
+      @if (mode() === 'YEAR') {
+        <h2 class="secao-titulo">Melhor e pior mês</h2>
+        <p class="secao-dica">Pelo faturamento bruto, entre os meses que tiveram movimento.</p>
+
+        @if (annual()!.bestMonth; as melhor) {
+          <div class="extremo">
+            <span class="extremo-rotulo">
+              <mat-icon class="extremo-icone alto" aria-hidden="true">arrow_upward</mat-icon>
+              Maior faturamento
+            </span>
+            <strong class="extremo-mes">{{ melhor.label }}</strong>
+            <span class="extremo-valor">{{ melhor.grossRevenue | currency: 'BRL' }}</span>
+          </div>
+
+          @if (annual()!.worstMonth; as pior) {
+            <div class="extremo">
+              <span class="extremo-rotulo">
+                <mat-icon class="extremo-icone baixo" aria-hidden="true">arrow_downward</mat-icon>
+                Menor faturamento
+              </span>
+              <strong class="extremo-mes">{{ pior.label }}</strong>
+              <span class="extremo-valor">{{ pior.grossRevenue | currency: 'BRL' }}</span>
+            </div>
+          }
+        } @else {
+          <p class="secao-dica" style="margin: 0">
+            Nenhuma ordem foi entregue em {{ annual()!.year }} ainda.
+          </p>
+        }
+      } @else {
+        <h2 class="secao-titulo">Comparação com {{ monthly()!.previousLabel }}</h2>
+        <p class="secao-dica">O mesmo período do mês anterior, lado a lado.</p>
+
+        <table class="comparacao">
+          <caption class="cp-visually-hidden">
+            Comparação entre {{ monthly()!.label }} e {{ monthly()!.previousLabel }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Indicador</th>
+              <th scope="col" class="numero">{{ monthly()!.previousLabel }}</th>
+              <th scope="col" class="numero">{{ monthly()!.label }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Faturamento bruto</th>
+              <td class="numero">{{ monthly()!.previous.grossRevenue | currency: 'BRL' }}</td>
+              <td class="numero forte">{{ monthly()!.summary.grossRevenue | currency: 'BRL' }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Despesas</th>
+              <td class="numero">{{ monthly()!.previous.expenses | currency: 'BRL' }}</td>
+              <td class="numero forte">{{ monthly()!.summary.expenses | currency: 'BRL' }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Resultado</th>
+              <td class="numero">{{ monthly()!.previous.netRevenue | currency: 'BRL' }}</td>
+              <td class="numero forte" [class.negativo]="monthly()!.summary.netRevenue < 0">
+                {{ monthly()!.summary.netRevenue | currency: 'BRL' }}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Ordens faturadas</th>
+              <td class="numero">{{ monthly()!.previous.orderCount }}</td>
+              <td class="numero forte">{{ monthly()!.summary.orderCount }}</td>
+            </tr>
+          </tbody>
+        </table>
+      }
+    </section>
+  </div>
+}

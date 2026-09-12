@@ -1,0 +1,375 @@
+/*
+ * A ordem de serviço é a tela mais densa do sistema. A leitura foi organizada em
+ * duas colunas: à esquerda o que muda ao longo do atendimento (itens, orçamento,
+ * histórico), à direita o que é referência e quase não muda (carro, cliente,
+ * dados do atendimento).
+ */
+
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.status-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-label {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.closed-note {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.locked-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-warning-bg);
+  color: var(--cp-warning-fg);
+  font-size: 13px;
+}
+.locked-note mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  align-items: start;
+  gap: 16px;
+}
+
+.main-column,
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Sem isto a coluna cresce até caber a tabela e a grade estoura. */
+  min-width: 0;
+}
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cp-text);
+  margin: 0;
+}
+
+.sub-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cp-text-secondary);
+  margin: 16px 0 4px;
+}
+
+.empty-note,
+.quote-hint {
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+  margin: 0;
+}
+
+.free-text {
+  font-size: 14px;
+  color: var(--cp-text);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ===== itens ===== */
+.item-desc {
+  font-weight: 500;
+}
+
+.type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+.type-chip mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  color: var(--cp-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--cp-transition), color var(--cp-transition);
+}
+.icon-action:hover {
+  background: var(--cp-bg-hover);
+  color: var(--cp-text);
+}
+.icon-action:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: -2px;
+}
+.icon-action mat-icon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+}
+
+/* ===== totais ===== */
+.totals {
+  margin: 16px 0 0;
+  margin-left: auto;
+  max-width: 320px;
+  font-variant-numeric: tabular-nums;
+}
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+.totals dt {
+  color: var(--cp-text-secondary);
+}
+.totals dd {
+  margin: 0;
+  color: var(--cp-text);
+}
+.totals .discount {
+  color: var(--cp-success-fg);
+}
+.totals .grand {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cp-border);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* ===== orçamento ===== */
+/*
+ * O motivo da recusa ganha destaque próprio dentro do cartão. Tom de atenção,
+ * não de erro: recusar é resposta legítima do cliente, e a oficina precisa ler
+ * isso como informação para agir, não como falha.
+ */
+.motivo-recusa {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--cp-warning-fg);
+  border-radius: 0 var(--cp-radius-sm) var(--cp-radius-sm) 0;
+  background: var(--cp-warning-bg);
+}
+
+.motivo-rotulo {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cp-warning-fg);
+  margin-bottom: 4px;
+}
+
+.motivo-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--cp-text);
+  white-space: pre-wrap;
+}
+
+.motivo-texto.sem-motivo {
+  color: var(--cp-text-secondary);
+  font-style: italic;
+}
+
+.quote-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.field-hint {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+/* ===== linha do tempo ===== */
+.timeline {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.timeline-item {
+  position: relative;
+  padding: 0 0 20px 24px;
+}
+/* O fio que liga os eventos; o último não precisa dele. */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 14px;
+  bottom: 0;
+  width: 1px;
+  background: var(--cp-border);
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--cp-primary);
+}
+
+.timeline-title {
+  margin: 0;
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+}
+.timeline-title strong {
+  color: var(--cp-text);
+}
+
+.timeline-meta {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--cp-text-muted);
+}
+
+.timeline-note {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+  white-space: pre-wrap;
+}
+
+/* ===== ficha lateral ===== */
+.facts {
+  margin: 0;
+}
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--cp-border);
+  font-size: 14px;
+}
+.facts > div:last-child {
+  border-bottom: none;
+}
+.facts dt {
+  color: var(--cp-text-secondary);
+  flex-shrink: 0;
+}
+.facts dd {
+  margin: 0;
+  color: var(--cp-text);
+  text-align: right;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.plate {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.full {
+  width: 100%;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.side-column .cp-field + .cp-field {
+  margin-top: 16px;
+}
+
+/* Abaixo de 1100px a ficha lateral vira uma seção comum, embaixo. */
+@media (max-width: 1100px) {
+  .detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .status-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .status-actions .cp-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .totals {
+    max-width: none;
+  }
+}
+
+/* Ação destrutiva: peso de botão discreto, cor só no texto. */
+.danger-text {
+  color: var(--cp-danger-fg);
+}
+.danger-text:hover:not(:disabled) {
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+}

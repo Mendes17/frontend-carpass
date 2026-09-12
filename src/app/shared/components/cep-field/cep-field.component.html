@@ -1,0 +1,38 @@
+<div class="cp-field" [formGroup]="form()">
+  <label class="cp-label" for="zipCode">CEP</label>
+
+  <div class="entrada">
+    <input
+      id="zipCode"
+      type="text"
+      inputmode="numeric"
+      autocomplete="postal-code"
+      class="cp-input"
+      maxlength="9"
+      placeholder="00000-000"
+      [formControlName]="zipControl()"
+      (input)="onInput($event)"
+    />
+
+    @if (loading()) {
+      <span class="estado" role="status" aria-label="Buscando o endereço">
+        <span class="girando" aria-hidden="true"></span>
+      </span>
+    } @else if (found()) {
+      <span class="estado achou" aria-hidden="true">
+        <mat-icon>check_circle</mat-icon>
+      </span>
+    }
+  </div>
+
+  <!--
+    A mensagem ocupa o lugar da dica do campo. Ela fala do que fazer a seguir
+    ("informe o número") ou do que fazer no lugar ("preencha manualmente") — em
+    nenhum dos casos a pessoa fica sem saída.
+  -->
+  @if (message()) {
+    <span class="recado" [class.erro]="!found()" role="status">{{ message() }}</span>
+  } @else {
+    <span class="field-hint">Digite o CEP e o resto do endereço se preenche sozinho.</span>
+  }
+</div>

@@ -1,0 +1,23 @@
+/* A OS é identificada pelo número: ele lidera a linha e alinha entre linhas. */
+.order-number {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cp-text);
+}
+
+.plate {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.badge-pair {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.clickable-row {
+  cursor: pointer;
+}

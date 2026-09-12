@@ -1,0 +1,210 @@
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--cp-navbar-height);
+  padding: 0 16px;
+  background: var(--cp-bg-navbar);
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 40px é o mínimo confortável para toque. */
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  color: var(--cp-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--cp-transition), color var(--cp-transition);
+}
+.icon-btn:hover {
+  background: var(--cp-bg-hover);
+  color: var(--cp-text);
+}
+.icon-btn:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+
+/* O botão de menu só existe enquanto a barra lateral está escondida. */
+.menu-btn {
+  display: none;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  color: var(--cp-text);
+  transition: background-color var(--cp-transition);
+}
+.account:hover {
+  background: var(--cp-bg-hover);
+}
+.account:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--cp-primary);
+  color: var(--cp-text-on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.account-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.25;
+  min-width: 0;
+}
+.account-name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+.account-role {
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+}
+.account-caret {
+  color: var(--cp-text-muted);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* ------------------------------------------------------ seletor de oficina */
+
+/*
+ * Fica à esquerda, encostado no menu, e não junto da conta: ele responde
+ * "onde estou", que é contexto do que a tela mostra — e não "quem sou eu".
+ */
+.oficina {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  color: var(--cp-text);
+  cursor: pointer;
+  transition: background-color var(--cp-transition), border-color var(--cp-transition);
+}
+.oficina:hover:not(:disabled) {
+  background: var(--cp-bg-hover);
+  border-color: var(--cp-primary);
+}
+.oficina:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+.oficina:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.oficina-icone {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--cp-text-secondary);
+}
+
+.oficina-nome {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Nome longo de oficina não pode empurrar o resto do cabeçalho para fora. */
+  max-width: 200px;
+}
+
+.oficina-caret {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--cp-text-muted);
+}
+
+.menu-titulo {
+  padding: 10px 16px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--cp-text-secondary);
+}
+
+.menu-oficina {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.menu-oficina-nome {
+  font-size: 14px;
+}
+
+/* O papel vem junto porque a mesma pessoa pode ser dona de uma e mecânica em
+   outra — o nome sozinho não diria em que pé ela entra. */
+.menu-oficina-papel {
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+}
+
+@media (max-width: 1023px) {
+  .menu-btn {
+    display: inline-flex;
+  }
+}
+
+/* Em telas estreitas o nome sai e fica só o avatar, para o cabeçalho não quebrar. */
+@media (max-width: 600px) {
+  .account-text,
+  .account-caret {
+    display: none;
+  }
+  .account {
+    padding: 4px;
+  }
+
+  /* O seletor de oficina encolhe, mas não some: saber em qual oficina se está
+     é justamente o que evita lançar uma ordem no lugar errado. */
+  .oficina-nome {
+    max-width: 110px;
+  }
+}

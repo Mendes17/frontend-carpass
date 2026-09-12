@@ -1,0 +1,16 @@
+<a class="cp-skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+<div class="layout">
+  <cp-sidebar [open]="sidebarOpen()" (close)="closeSidebar()" />
+
+  @if (sidebarOpen()) {
+    <div class="overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+  }
+
+  <div class="column">
+    <cp-topbar (toggleSidebar)="toggleSidebar()" />
+    <main id="conteudo" class="content animate-fade-in" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

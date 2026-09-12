@@ -1,0 +1,195 @@
+<cp-page-header title="Minha oficina" subtitle="Dados cadastrais que aparecem nos documentos." />
+
+<section class="cp-card">
+  @if (loading()) {
+    <cp-skeleton height="24px" width="40%" />
+    <div style="height: 16px"></div>
+    <cp-skeleton height="120px" />
+  } @else {
+    <h2 class="card-title">Identificação</h2>
+    <p class="card-hint">O CNPJ não pode ser alterado: ele identifica a empresa no histórico já emitido.</p>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="cp-form-grid">
+        <div class="cp-field">
+          <label class="cp-label" for="tradeName">Nome fantasia</label>
+          <input id="tradeName" type="text" class="cp-input" formControlName="tradeName"
+                 [class.error]="form.controls.tradeName.touched && form.controls.tradeName.invalid" />
+          @if (form.controls.tradeName.touched && form.controls.tradeName.invalid) {
+            <span class="cp-error-msg">Informe o nome fantasia.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="corporateName">Razão social</label>
+          <input id="corporateName" type="text" class="cp-input" formControlName="corporateName" />
+        </div>
+
+        <div class="cp-field">
+          <span class="cp-label">CNPJ</span>
+          <p class="readonly-field">
+            <mat-icon aria-hidden="true">lock</mat-icon>
+            <span>{{ workshop()?.cnpj }}</span>
+          </p>
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="workshopPhone">Telefone</label>
+          <input id="workshopPhone" type="tel" class="cp-input" formControlName="phone" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="workshopEmail">E-mail</label>
+          <input id="workshopEmail" type="email" class="cp-input" formControlName="email"
+                 [class.error]="form.controls.email.touched && form.controls.email.invalid" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <span class="cp-error-msg">E-mail inválido.</span>
+          }
+        </div>
+
+        <!--
+          Fora do reactive form de propósito: um input de arquivo não guarda o
+          próprio valor. O que sai daqui é `logoUrl()`, incluído à mão no
+          payload do "Salvar alterações".
+        -->
+        <div class="cp-field cp-field-full">
+          <span class="cp-label">Logo da oficina</span>
+          <div class="logo-linha">
+            <span class="logo-preview" [class.vazia]="!logoUrl()">
+              @if (logoUrl(); as logo) {
+                <img [src]="logo" alt="Logo atual da oficina" />
+              } @else {
+                <mat-icon aria-hidden="true">image</mat-icon>
+              }
+            </span>
+
+            <div class="logo-controles">
+              <label class="cp-btn cp-btn-secondary logo-escolher">
+                {{ logoUrl() ? 'Trocar arquivo' : 'Escolher arquivo' }}
+                <input type="file" accept="image/png,image/jpeg,image/webp" class="cp-visually-hidden"
+                       (change)="onLogoSelected($event)" />
+              </label>
+              @if (logoUrl()) {
+                <button type="button" class="cp-btn cp-btn-ghost" (click)="removeLogo()">Remover</button>
+              }
+            </div>
+          </div>
+          @if (logoError()) {
+            <span class="cp-error-msg">{{ logoError() }}</span>
+          } @else {
+            <span class="field-hint">
+              PNG, JPG ou WEBP, até 400 KB. Aparece no cabeçalho da OS, do orçamento impresso e do
+              relatório financeiro.
+            </span>
+          }
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <h2 class="card-title">Endereço</h2>
+      <p class="card-hint">Usado nos documentos que a oficina emite.</p>
+
+      <div class="cp-form-grid">
+        <!-- Digitar o CEP preenche rua, bairro, cidade e estado. -->
+        <cp-cep-field [form]="form" />
+
+        <div class="cp-field cp-field-full">
+          <label class="cp-label" for="street">Rua</label>
+          <input id="street" type="text" class="cp-input" formControlName="street" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="number">Número</label>
+          <input id="number" type="text" class="cp-input" formControlName="number" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="complement">Complemento</label>
+          <input id="complement" type="text" class="cp-input" formControlName="complement" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="neighborhood">Bairro</label>
+          <input id="neighborhood" type="text" class="cp-input" formControlName="neighborhood" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="city">Cidade</label>
+          <input id="city" type="text" class="cp-input" formControlName="city" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="state">Estado</label>
+          <input id="state" type="text" class="cp-input" formControlName="state" maxlength="2" placeholder="SP" />
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <h2 class="form-section-title">Ordens paradas</h2>
+      <p class="form-section-hint">
+        Uma OS aberta que ninguém toca por dias quase sempre é cliente que sumiu sem responder ou
+        alguém que esqueceu de fechar. Nos dois casos ela fica na lista fingindo trabalho que não
+        existe.
+      </p>
+
+      <div class="cp-field">
+        <label class="cp-label" for="autoCloseOpenOrdersHours">Encerrar automaticamente após</label>
+        <select id="autoCloseOpenOrdersHours" class="cp-select" formControlName="autoCloseOpenOrdersHours">
+          <option value="">Nunca — encerro na mão</option>
+          <option value="24">24 horas paradas</option>
+          <option value="48">48 horas paradas</option>
+          <option value="72">72 horas paradas</option>
+          <option value="168">7 dias parados</option>
+        </select>
+        <span class="field-hint">
+          O relógio conta a partir da <strong>última movimentação</strong>, não da abertura — uma OS
+          mexida hoje de manhã não está parada. A ordem é cancelada, as peças voltam ao estoque e a
+          linha do tempo registra que foi o sistema. Com 24 horas, um carro que entra na sexta à
+          tarde é encerrado no sábado; 72 horas costuma ser o prazo que sobrevive a fim de semana e
+          a peça encomendada.
+        </span>
+      </div>
+
+      <div class="cp-form-actions">
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>
+
+<!--
+  Fora do formulário de propósito: esta chave não é cadastro, é permissão. Ela
+  tem endpoint próprio e salva sozinha, porque o formulário acima é editável
+  pelo gerente — se ela viajasse junto, o gerente se autorizaria ao salvar.
+-->
+@if (isOwner() && workshop(); as oficina) {
+  <section class="cp-card form-card" style="margin-top: 16px">
+    <h2 class="form-section-title">Quem vê o financeiro</h2>
+    <p class="form-section-hint">
+      Faturamento, despesas e resultado são informação sensível. Você sempre enxerga; aqui você decide
+      se o gerente também. Atendente e mecânico nunca veem.
+    </p>
+
+    <label class="chave">
+      <input
+        type="checkbox"
+        class="chave-input"
+        [checked]="oficina.managerCanSeeFinance"
+        [disabled]="savingFinanceAccess()"
+        (change)="toggleFinanceAccess($event)"
+      />
+      <span class="chave-texto">
+        <strong>O gerente pode ver o financeiro</strong>
+        <span class="chave-dica">
+          {{
+            oficina.managerCanSeeFinance
+              ? 'Hoje o gerente vê o painel financeiro, as despesas e o faturamento do mês no Painel.'
+              : 'Hoje o gerente não vê o financeiro nem o faturamento do mês no Painel.'
+          }}
+        </span>
+      </span>
+    </label>
+  </section>
+}

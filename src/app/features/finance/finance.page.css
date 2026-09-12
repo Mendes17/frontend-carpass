@@ -1,0 +1,386 @@
+/*
+ * Painel financeiro.
+ *
+ * A tela é lida de cima para baixo: primeiro o período, depois o resultado em
+ * quatro números, e só então os gráficos que explicam como se chegou neles.
+ * O seletor fica no topo porque tudo abaixo dele depende do que ele diz.
+ */
+
+/* ------------------------------------------------------------ período */
+
+.periodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modo {
+  display: inline-flex;
+  padding: 3px;
+  gap: 3px;
+  background: var(--cp-bg-hover);
+  border-radius: var(--cp-radius-sm);
+}
+
+.modo-opcao {
+  min-width: 74px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cp-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--cp-transition), color var(--cp-transition);
+}
+
+.modo-opcao.selected {
+  background: var(--cp-bg-card);
+  color: var(--cp-text);
+  font-weight: 600;
+  box-shadow: var(--cp-shadow);
+}
+
+.modo-opcao:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+
+.navegacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.periodo-select {
+  /* O .cp-select nasce com width:100% para o formulário; aqui ele é um
+     controle na barra e volta a ter largura de conteúdo. */
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 190px;
+}
+
+.passo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-card);
+  color: var(--cp-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--cp-transition), color var(--cp-transition);
+}
+
+.passo:hover:not(:disabled) {
+  border-color: var(--cp-primary);
+  color: var(--cp-primary-fg);
+}
+
+.passo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.passo:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ cartões */
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+}
+
+/* O líquido é o número que a pessoa veio ver: ganha a borda de destaque. */
+.cartao.destaque {
+  border-color: var(--cp-primary);
+}
+
+.cartao-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cartao-rotulo {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.cartao-icone {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--cp-text-muted);
+  flex: 0 0 auto;
+}
+
+/* Os ícones de bruto e despesa usam as cores das séries do gráfico, para o
+   cartão e a barra correspondente se reconhecerem. */
+.cartao-icone.bruto {
+  color: var(--cp-chart-gross);
+}
+
+.cartao-icone.despesa {
+  color: var(--cp-chart-expense);
+}
+
+.cartao-valor {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--cp-text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.cartao-valor.negativo {
+  color: var(--cp-danger-fg);
+}
+
+.cartao-dica {
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+}
+
+/*
+ * A variação nunca é só cor: vem com seta e com o sinal escrito. Verde e
+ * vermelho aqui significam "melhor" e "pior", e não "positivo" e "negativo" --
+ * despesa que sobe é má notícia mesmo com o número subindo.
+ */
+.variacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.variacao mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+}
+
+.variacao.sobe {
+  color: var(--cp-success-fg);
+}
+
+.variacao.desce {
+  color: var(--cp-danger-fg);
+}
+
+/* ------------------------------------------------------------- painéis */
+
+.painel {
+  padding: 20px;
+}
+
+.secao-titulo {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+
+.secao-dica {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+/* -------------------------------------------------- gastos por categoria */
+
+.categorias {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.categorias tr + tr > * {
+  padding-top: 10px;
+}
+
+.categoria-nome {
+  font-weight: 400;
+  text-align: left;
+  color: var(--cp-text-secondary);
+  padding-right: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.categoria-barra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.trilho {
+  flex: 1;
+  min-width: 40px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--cp-bg-hover);
+  overflow: hidden;
+}
+
+.preenchimento {
+  display: block;
+  height: 100%;
+  /* Ponta arredondada só do lado do dado; a base fica ancorada no zero. */
+  border-radius: 0 4px 4px 0;
+  background: var(--cp-chart-expense);
+}
+
+.categoria-fatia {
+  min-width: 4.5ch;
+  text-align: right;
+  color: var(--cp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.categoria-valor {
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 12px;
+  color: var(--cp-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------- comparação */
+
+.comparacao {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.comparacao th,
+.comparacao td {
+  padding: 8px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.comparacao thead th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--cp-text-secondary);
+  font-weight: 600;
+}
+
+.comparacao tbody th {
+  font-weight: 400;
+  color: var(--cp-text-secondary);
+}
+
+.comparacao .numero {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  padding-left: 12px;
+}
+
+/* A coluna do período escolhido é a resposta; a do anterior é referência. */
+.comparacao .forte {
+  color: var(--cp-text);
+  font-weight: 600;
+}
+
+.comparacao .forte.negativo {
+  color: var(--cp-danger-fg);
+}
+
+/* --------------------------------------------------- melhor e pior mês */
+
+.extremo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.extremo:last-child {
+  border-bottom: none;
+}
+
+.extremo-rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+  flex: 1 1 auto;
+}
+
+.extremo-icone {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.extremo-icone.alto {
+  color: var(--cp-success);
+}
+
+.extremo-icone.baixo {
+  color: var(--cp-text-muted);
+}
+
+.extremo-mes {
+  font-size: 14px;
+  color: var(--cp-text);
+}
+
+.extremo-valor {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cp-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .periodo {
+    gap: 10px;
+  }
+
+  /* No celular a barra de período ocupa a largura toda, e o select cresce
+     junto: o rótulo "Setembro de 2026" não pode sair cortado. */
+  .navegacao {
+    width: 100%;
+  }
+
+  .periodo-select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .cartao-valor {
+    font-size: 22px;
+  }
+
+  .categoria-nome {
+    max-width: 110px;
+  }
+}

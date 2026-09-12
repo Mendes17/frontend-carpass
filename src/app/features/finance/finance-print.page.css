@@ -1,0 +1,288 @@
+/*
+ * O relatório financeiro em papel.
+ *
+ * Mesma base das folhas de OS e orçamento — sempre clara, o que se vê é o que
+ * imprime — e sem arquivo compartilhado com elas pelo mesmo motivo: as três
+ * folhas divergem em conteúdo e vão divergir mais com o tempo.
+ */
+.area {
+  min-height: 100vh;
+  background: var(--cp-bg);
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.carregando {
+  color: var(--cp-text-muted);
+  padding: 48px 0;
+}
+
+/* ------------------------------------------------------------- ações */
+
+.acoes {
+  width: 100%;
+  max-width: 210mm;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.dica {
+  font-size: 13px;
+  color: var(--cp-text-muted);
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------- a folha */
+
+.folha {
+  width: 100%;
+  max-width: 210mm;
+  background: #fff;
+  color: #111;
+  padding: 16mm 14mm;
+  border-radius: 4px;
+  box-shadow: 0 2px 16px rgb(0 0 0 / 18%);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 2px solid #111;
+  padding-bottom: 10px;
+}
+
+.oficina {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Tamanho fixo: uma logo enviada grande não pode empurrar o resto do cabeçalho. */
+.oficina-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.oficina-dados {
+  min-width: 0;
+}
+
+.oficina-nome {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: #111;
+}
+
+.oficina-linha {
+  margin: 0;
+  font-size: 11px;
+  color: #444;
+}
+
+.identificacao {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 1px;
+  flex: 0 0 auto;
+}
+
+.doc-rotulo {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #444;
+}
+
+.doc-numero {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.doc-emissao {
+  font-size: 10px;
+  color: #444;
+  margin-top: 2px;
+}
+
+/* ------------------------------------------------------------- blocos */
+
+.bloco {
+  margin-top: 14px;
+}
+
+.bloco-titulo {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #111;
+  margin: 0 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #bbb;
+}
+
+.texto {
+  margin: 0;
+}
+
+/* Grade de campos: rótulo pequeno em cima, valor abaixo. */
+.campos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.campos > div {
+  min-width: 0;
+}
+
+.campos dt {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #666;
+}
+
+.campos dd {
+  margin: 2px 0 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* O resumo é o motivo desta folha existir: os quatro números ganham destaque. */
+.campos-resumo dd.destaque {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------- tabelas */
+
+.itens {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.itens th,
+.itens td {
+  border: 1px solid #ccc;
+  padding: 5px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.itens thead th {
+  background: #eee;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.itens .num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.rodape {
+  margin-top: 18px;
+  padding-top: 6px;
+  border-top: 1px solid #ccc;
+  font-size: 9px;
+  color: #666;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------- telas menores */
+
+@media (max-width: 700px) {
+  .campos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .folha {
+    padding: 16px 14px;
+  }
+
+  .topo {
+    flex-direction: column;
+  }
+
+  .identificacao {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* ------------------------------------------------------------- impressão */
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  .acoes {
+    display: none !important;
+  }
+
+  .area {
+    background: #fff;
+    padding: 0;
+    display: block;
+    min-height: 0;
+  }
+
+  .folha {
+    max-width: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 10.5pt;
+  }
+
+  /* Fundo de cabeçalho de tabela precisa ser pedido explicitamente, senão o
+     navegador economiza tinta e some com a faixa que separa as colunas. */
+  .itens thead th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .itens tr,
+  .campos > div {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .itens thead {
+    display: table-header-group;
+  }
+
+  .evita-quebra {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .bloco-titulo {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}

@@ -1,0 +1,124 @@
+/* Estilos comuns às telas públicas de autenticação. */
+
+.auth-title {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+  margin-bottom: 28px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.auth-alert mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.auth-success {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-success-bg);
+  color: var(--cp-success-fg);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.auth-success mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.input-with-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-with-action .cp-input {
+  padding-right: 48px;
+}
+.input-action {
+  position: absolute;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  color: var(--cp-text-muted);
+  cursor: pointer;
+}
+.input-action:hover {
+  color: var(--cp-text);
+}
+.input-action:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: -2px;
+}
+
+.auth-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.auth-link {
+  font-size: 14px;
+  color: var(--cp-primary);
+  font-weight: 500;
+}
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+}
+
+.auth-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cp-text-secondary);
+  margin-top: 8px;
+}
+
+.auth-hint {
+  font-size: 12px;
+  color: var(--cp-text-muted);
+  margin-top: 4px;
+}

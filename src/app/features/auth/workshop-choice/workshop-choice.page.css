@@ -1,0 +1,185 @@
+/*
+ * Escolha de oficina e criação da própria.
+ *
+ * As duas telas ficam fora do shell — não há oficina escolhida ainda, então não
+ * haveria o que colocar no menu lateral nem no cabeçalho. O visual segue as
+ * telas de autenticação, que é onde a pessoa acabou de estar.
+ */
+
+.area {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--cp-bg);
+}
+
+.cartao {
+  width: 100%;
+  max-width: 520px;
+  padding: 32px;
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+}
+
+.topo {
+  margin-bottom: 24px;
+}
+
+.marca {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cp-primary-fg);
+  letter-spacing: 0.5px;
+}
+
+.titulo {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--cp-text);
+  line-height: 1.3;
+}
+
+.subtitulo {
+  margin: 0;
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.alerta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+  font-size: 14px;
+}
+
+.alerta mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------------- lista */
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opcao {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-card);
+  color: var(--cp-text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--cp-transition), background-color var(--cp-transition);
+}
+
+.opcao:hover:not(:disabled) {
+  border-color: var(--cp-primary);
+  background: var(--cp-bg-hover);
+}
+
+.opcao:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+
+/* Enquanto uma entrada está em curso, as outras ficam inertes — dois cliques
+   rápidos abririam duas sessões e a última a responder venceria. */
+.opcao:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.opcao.carregando {
+  opacity: 1;
+  border-color: var(--cp-primary);
+}
+
+.opcao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-hover);
+  color: var(--cp-primary-fg);
+}
+
+.opcao-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.opcao-nome {
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.opcao-papel {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.opcao-seta {
+  flex: 0 0 auto;
+  color: var(--cp-text-muted);
+}
+
+/* -------------------------------------------------------------- rodapé */
+
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cp-border);
+}
+
+@media (max-width: 520px) {
+  .cartao {
+    padding: 24px 20px;
+  }
+
+  .titulo {
+    font-size: 19px;
+  }
+
+  .rodape {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

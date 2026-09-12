@@ -1,0 +1,129 @@
+<div class="area">
+  <section class="cartao">
+    <header class="topo">
+      <span class="marca">CarPass</span>
+
+      @if (temOutras()) {
+        <h1 class="titulo">Cadastrar outra oficina</h1>
+        <p class="subtitulo">
+          Ela entra na sua lista de oficinas, e você troca entre elas pelo seletor no topo da tela.
+        </p>
+      } @else {
+        <h1 class="titulo">Cadastre a sua oficina</h1>
+        <!-- O texto é escrito para quem foi desligado de uma oficina: a conta
+             continua sendo dele, e é a mesma que ele já usava. -->
+        <p class="subtitulo">
+          @if (user(); as pessoa) {
+            Você está entrando com <strong>{{ pessoa.email }}</strong> e ainda não tem vínculo com
+            nenhuma oficina. Cadastre a sua para começar — a conta é a mesma, você passa a ser o
+            proprietário.
+          } @else {
+            Cadastre a sua oficina para começar.
+          }
+        </p>
+      }
+    </header>
+
+    @if (errorMessage()) {
+      <div class="alerta" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="cp-form-grid">
+        <div class="cp-field cp-field-full">
+          <label class="cp-label" for="tradeName">Nome fantasia</label>
+          <input id="tradeName" type="text" class="cp-input" formControlName="tradeName"
+                 placeholder="Auto Center Silva"
+                 [class.error]="form.controls.tradeName.touched && form.controls.tradeName.invalid" />
+          @if (form.controls.tradeName.touched && form.controls.tradeName.invalid) {
+            <span class="cp-error-msg">Informe o nome fantasia.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="corporateName">Razão social</label>
+          <input id="corporateName" type="text" class="cp-input" formControlName="corporateName" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="cnpj">CNPJ</label>
+          <input id="cnpj" type="text" class="cp-input" inputmode="numeric"
+                 placeholder="00.000.000/0000-00" (input)="onCnpjInput($event)"
+                 [class.error]="form.controls.cnpj.touched && form.controls.cnpj.invalid" />
+          @if (form.controls.cnpj.touched && form.controls.cnpj.invalid) {
+            <span class="cp-error-msg">Informe um CNPJ com 14 dígitos.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="workshopPhone">Telefone da oficina</label>
+          <input id="workshopPhone" type="tel" class="cp-input" formControlName="workshopPhone" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="workshopEmail">E-mail da oficina</label>
+          <input id="workshopEmail" type="email" class="cp-input" formControlName="workshopEmail"
+                 [class.error]="form.controls.workshopEmail.touched && form.controls.workshopEmail.invalid" />
+          @if (form.controls.workshopEmail.touched && form.controls.workshopEmail.invalid) {
+            <span class="cp-error-msg">E-mail inválido.</span>
+          }
+        </div>
+      </div>
+
+      <hr class="divisor" />
+      <h2 class="secao">Endereço</h2>
+      <p class="secao-dica">Aparece nos documentos que a oficina emite. Pode preencher depois.</p>
+
+      <div class="cp-form-grid">
+        <cp-cep-field [form]="form" />
+
+        <div class="cp-field cp-field-full">
+          <label class="cp-label" for="street">Rua</label>
+          <input id="street" type="text" class="cp-input" formControlName="street" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="number">Número</label>
+          <input id="number" type="text" class="cp-input" formControlName="number" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="complement">Complemento</label>
+          <input id="complement" type="text" class="cp-input" formControlName="complement" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="neighborhood">Bairro</label>
+          <input id="neighborhood" type="text" class="cp-input" formControlName="neighborhood" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="city">Cidade</label>
+          <input id="city" type="text" class="cp-input" formControlName="city" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="state">Estado</label>
+          <input id="state" type="text" class="cp-input" formControlName="state" maxlength="2" placeholder="SP" />
+        </div>
+      </div>
+
+      <div class="acoes">
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Criando...' : 'Criar oficina' }}
+        </button>
+
+        @if (dentroDeOficina()) {
+          <a routerLink="/painel" class="cp-btn cp-btn-ghost">Cancelar</a>
+        } @else if (temOutras()) {
+          <a routerLink="/escolher-oficina" class="cp-btn cp-btn-ghost">Voltar para minhas oficinas</a>
+        } @else {
+          <button type="button" class="cp-btn cp-btn-ghost" (click)="sair()">Sair da conta</button>
+        }
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,356 @@
+/*
+ * Tela do cliente, fora do sistema.
+ *
+ * Quem abre isto está no celular, provavelmente em casa, e não conhece o
+ * produto. Então: coluna única, texto maior que o do painel, e a decisão em
+ * dois botões que cabem no polegar. Sem menu, sem barra lateral, sem jargão.
+ *
+ * Ela usa os mesmos tokens de cor do resto do sistema, mas não herda nenhum
+ * layout do shell — de propósito, para não parecer que o cliente entrou numa
+ * área administrativa.
+ */
+
+.pagina {
+  min-height: 100vh;
+  background: var(--cp-bg);
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.marca {
+  width: 100%;
+  max-width: 640px;
+  padding: 4px 0 8px;
+}
+
+.marca-nome {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cp-primary-fg);
+  letter-spacing: 0.3px;
+}
+
+.cartao {
+  width: 100%;
+  max-width: 640px;
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+  padding: 28px;
+}
+
+.carregando {
+  margin: 0;
+  color: var(--cp-text-secondary);
+  text-align: center;
+}
+
+/* ===== cabeçalho do orçamento ===== */
+.oficina {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cp-text-secondary);
+}
+
+.titulo {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cp-text);
+}
+
+.subtitulo {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cp-text-secondary);
+}
+
+.relato {
+  padding: 12px 14px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-neutral-bg);
+  margin-bottom: 24px;
+}
+
+.relato-rotulo {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cp-text-secondary);
+  margin-bottom: 4px;
+}
+
+.relato-texto {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--cp-neutral-fg);
+  white-space: pre-wrap;
+}
+
+.secao {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+
+/* ===== itens ===== */
+.itens {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--cp-border);
+}
+.item:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-nome {
+  font-size: 15px;
+  color: var(--cp-text);
+}
+
+.item-detalhe {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.item-valor {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cp-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ===== totais ===== */
+.totais {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 2px solid var(--cp-border);
+  font-variant-numeric: tabular-nums;
+}
+.totais > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 5px 0;
+  font-size: 15px;
+}
+.totais dt {
+  color: var(--cp-text-secondary);
+}
+.totais dd {
+  margin: 0;
+  color: var(--cp-text);
+}
+.totais .desconto {
+  color: var(--cp-success-fg);
+}
+.totais .total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--cp-border);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.entrega {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0 0;
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+}
+.entrega mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== decisão ===== */
+.decisao-titulo {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+
+.decisao-texto {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cp-text-secondary);
+}
+
+.decisao-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Alvo de toque generoso: a pessoa está no celular decidindo sobre dinheiro. */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 14px 24px;
+  border: 1px solid transparent;
+  border-radius: var(--cp-radius-sm);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--cp-transition), background-color var(--cp-transition);
+}
+.botao:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.botao:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: 2px;
+}
+
+.aprovar {
+  background: var(--cp-primary);
+  color: #fff;
+}
+.aprovar:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+/* Recusar é uma escolha legítima, não um erro: fica discreto, não alarmante. */
+.recusar,
+.voltar {
+  background: transparent;
+  border-color: var(--cp-border);
+  color: var(--cp-text-secondary);
+}
+.recusar:hover:not(:disabled),
+.voltar:hover:not(:disabled) {
+  background: var(--cp-bg-hover);
+}
+
+.recusar-confirma {
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+  border-color: var(--cp-danger-fg);
+}
+
+.motivo {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-input);
+  color: var(--cp-text);
+  font-family: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+.motivo:focus {
+  outline: none;
+  border-color: var(--cp-border-focus);
+}
+
+/* ===== resultado e avisos ===== */
+.resultado,
+.aviso {
+  text-align: center;
+}
+
+.resultado-icone,
+.aviso-icone {
+  font-size: 44px;
+  width: 44px;
+  height: 44px;
+  color: var(--cp-success-fg);
+  margin-bottom: 8px;
+}
+.resultado.recusado .resultado-icone {
+  color: var(--cp-text-secondary);
+}
+.aviso-icone {
+  color: var(--cp-text-secondary);
+}
+
+.resultado-titulo,
+.aviso-titulo {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cp-text);
+}
+
+.resultado-texto,
+.aviso-texto {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cp-text-secondary);
+}
+
+.resultado-contato {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--cp-text-secondary);
+}
+
+.erro {
+  width: 100%;
+  max-width: 640px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+  font-size: 14px;
+}
+
+.rodape {
+  max-width: 640px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--cp-text-muted);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .decisao-acoes {
+    flex-direction: row;
+  }
+  .aprovar {
+    flex: 1;
+  }
+}

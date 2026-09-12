@@ -1,0 +1,149 @@
+<div class="pagina">
+  <header class="marca">
+    <span class="marca-nome">CarPass</span>
+  </header>
+
+  @if (loading()) {
+    <section class="cartao">
+      <p class="carregando">Carregando o orçamento...</p>
+    </section>
+  } @else if (!quote()) {
+    <section class="cartao aviso">
+      <mat-icon aria-hidden="true" class="aviso-icone">link_off</mat-icon>
+      <h1 class="aviso-titulo">Não foi possível abrir este orçamento</h1>
+      <p class="aviso-texto">{{ errorMessage() }}</p>
+    </section>
+  } @else {
+    @let q = quote()!;
+
+    <!-- resposta registrada -->
+    @if (decided()) {
+      <section class="cartao resultado" [class.recusado]="decided() === 'REJECTED'">
+        <mat-icon aria-hidden="true" class="resultado-icone">
+          {{ decided() === 'APPROVED' ? 'check_circle' : 'cancel' }}
+        </mat-icon>
+        <h1 class="resultado-titulo">
+          {{ decided() === 'APPROVED' ? 'Orçamento aprovado' : 'Orçamento recusado' }}
+        </h1>
+        <p class="resultado-texto">
+          @if (decided() === 'APPROVED') {
+            A {{ q.workshopName }} já foi avisada e vai seguir com o serviço.
+          } @else {
+            A {{ q.workshopName }} já foi avisada e vai entrar em contato para rever a proposta.
+          }
+        </p>
+        @if (q.workshopPhone) {
+          <p class="resultado-contato">Dúvidas? Fale com a oficina: {{ q.workshopPhone }}</p>
+        }
+      </section>
+    }
+
+    <section class="cartao">
+      <p class="oficina">{{ q.workshopName }}</p>
+      <h1 class="titulo">Orçamento do seu veículo</h1>
+      <p class="subtitulo">
+        Olá, {{ q.customerName }}. Confira o que a oficina propõe para o seu
+        {{ q.vehicleDescription }}, placa {{ q.vehiclePlate }}.
+      </p>
+
+      @if (q.reportedProblem) {
+        <div class="relato">
+          <span class="relato-rotulo">O que você relatou</span>
+          <p class="relato-texto">{{ q.reportedProblem }}</p>
+        </div>
+      }
+
+      <!-- itens -->
+      <h2 class="secao">O que será feito</h2>
+      <ul class="itens">
+        @for (item of q.items; track item.description) {
+          <li class="item">
+            <div class="item-info">
+              <span class="item-nome">{{ item.description }}</span>
+              <span class="item-detalhe">
+                {{ item.typeLabel }} · {{ item.quantity }} ×
+                {{ item.unitPrice | currency: 'BRL' }}
+              </span>
+            </div>
+            <span class="item-valor">{{ item.totalPrice | currency: 'BRL' }}</span>
+          </li>
+        }
+      </ul>
+
+      <!-- totais -->
+      <dl class="totais">
+        <div><dt>Serviços</dt><dd>{{ (q.servicesTotal || 0) | currency: 'BRL' }}</dd></div>
+        <div><dt>Peças</dt><dd>{{ (q.partsTotal || 0) | currency: 'BRL' }}</dd></div>
+        @if (q.discount) {
+          <div><dt>Desconto</dt><dd class="desconto">− {{ q.discount | currency: 'BRL' }}</dd></div>
+        }
+        <div class="total"><dt>Total</dt><dd>{{ (q.totalAmount || 0) | currency: 'BRL' }}</dd></div>
+      </dl>
+
+      @if (q.estimatedDeliveryDate) {
+        <p class="entrega">
+          <mat-icon aria-hidden="true">event</mat-icon>
+          Previsão de entrega: {{ q.estimatedDeliveryDate | date: 'dd/MM/yyyy' }}
+        </p>
+      }
+    </section>
+
+    <!-- decisão -->
+    @if (q.pending && !decided()) {
+      @if (errorMessage()) {
+        <p class="erro" role="alert">{{ errorMessage() }}</p>
+      }
+
+      @if (!rejecting()) {
+        <section class="cartao decisao">
+          <h2 class="decisao-titulo">Você autoriza este serviço?</h2>
+          <p class="decisao-texto">
+            Sua resposta chega na hora para a oficina. Se preferir conversar antes, ligue para eles.
+          </p>
+          <div class="decisao-acoes">
+            <button type="button" class="botao aprovar" [disabled]="working()" (click)="approve()">
+              <mat-icon aria-hidden="true">check</mat-icon>
+              Aprovar orçamento
+            </button>
+            <button type="button" class="botao recusar" [disabled]="working()" (click)="startReject()">
+              Recusar
+            </button>
+          </div>
+        </section>
+      } @else {
+        <section class="cartao decisao">
+          <h2 class="decisao-titulo">Por que está recusando?</h2>
+          <p class="decisao-texto">
+            Contar o motivo ajuda a oficina a rever a proposta. É opcional.
+          </p>
+          <textarea class="motivo" rows="3" [ngModel]="rejectNote()"
+                    (ngModelChange)="rejectNote.set($event)"
+                    placeholder="Achei caro, vou pensar melhor, prefiro fazer só parte do serviço..."></textarea>
+          <div class="decisao-acoes">
+            <button type="button" class="botao recusar-confirma" [disabled]="working()" (click)="confirmReject()">
+              Confirmar recusa
+            </button>
+            <button type="button" class="botao voltar" [disabled]="working()" (click)="cancelReject()">
+              Voltar
+            </button>
+          </div>
+        </section>
+      }
+    } @else if (!q.pending && !decided()) {
+      <section class="cartao aviso">
+        <mat-icon aria-hidden="true" class="aviso-icone">task_alt</mat-icon>
+        <h2 class="aviso-titulo">Este orçamento já foi respondido</h2>
+        <p class="aviso-texto">
+          Situação atual: {{ q.status }}.
+          @if (q.workshopPhone) {
+            Se precisar, fale com a oficina: {{ q.workshopPhone }}.
+          }
+        </p>
+      </section>
+    }
+
+    <p class="rodape">
+      Este orçamento foi enviado pela {{ q.workshopName }}. Você não precisa criar conta nem senha.
+    </p>
+  }
+</div>

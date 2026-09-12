@@ -1,0 +1,69 @@
+:host {
+  display: block;
+}
+
+.entrada {
+  position: relative;
+}
+
+/*
+ * O indicador fica dentro do campo, à direita: é sobre aquele campo, e a
+ * resposta aparece onde o olho já está.
+ */
+.estado {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.estado.achou {
+  color: var(--cp-success);
+}
+
+.estado mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Aro girando: sinal de espera sem depender de texto nem de biblioteca. */
+.girando {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--cp-border);
+  border-top-color: var(--cp-primary);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Sem giro para quem pediu menos movimento; o aro parado ainda diz "espere". */
+  .girando {
+    animation: none;
+  }
+}
+
+.recado {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--cp-success-fg);
+}
+
+/*
+ * O aviso de falha é secundário, não vermelho de erro: nada quebrou e nada
+ * está inválido — só não deu para adiantar o preenchimento.
+ */
+.recado.erro {
+  color: var(--cp-text-secondary);
+}

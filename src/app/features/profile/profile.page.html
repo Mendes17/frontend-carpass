@@ -1,0 +1,99 @@
+<cp-page-header title="Meu perfil" subtitle="Seus dados de acesso ao CarPass." />
+
+<div class="cp-grid cp-grid-2">
+  <section class="cp-card">
+    <h2 class="card-title">Dados pessoais</h2>
+    <p class="card-hint">Como você aparece para o resto da equipe.</p>
+
+    @if (user(); as currentUser) {
+      <p class="identity">
+        <mat-icon aria-hidden="true">badge</mat-icon>
+        <span>{{ currentUser.roleLabel }}</span>
+        @if (currentUser.workshopName) {
+          <span>· {{ currentUser.workshopName }}</span>
+        }
+      </p>
+    }
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+      <div class="cp-form-grid">
+        <div class="cp-field">
+          <label class="cp-label" for="firstName">Nome</label>
+          <input id="firstName" type="text" class="cp-input" formControlName="firstName"
+                 [class.error]="profileForm.controls.firstName.touched && profileForm.controls.firstName.invalid" />
+          @if (profileForm.controls.firstName.touched && profileForm.controls.firstName.invalid) {
+            <span class="cp-error-msg">Informe seu nome.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="lastName">Sobrenome</label>
+          <input id="lastName" type="text" class="cp-input" formControlName="lastName" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="profileEmail">E-mail</label>
+          <input id="profileEmail" type="email" class="cp-input" formControlName="email"
+                 [class.error]="profileForm.controls.email.touched && profileForm.controls.email.invalid" />
+          @if (profileForm.controls.email.touched && profileForm.controls.email.invalid) {
+            <span class="cp-error-msg">Informe um e-mail válido.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="profilePhone">Telefone</label>
+          <input id="profilePhone" type="tel" class="cp-input" formControlName="phone" />
+        </div>
+      </div>
+
+      <div class="cp-form-actions">
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="savingProfile()">
+          {{ savingProfile() ? 'Salvando...' : 'Salvar alterações' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="cp-card">
+    <h2 class="card-title">Alterar senha</h2>
+    <p class="card-hint">Pedimos a senha atual para confirmar que é você.</p>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" novalidate>
+      <div class="cp-field">
+        <label class="cp-label" for="currentPassword">Senha atual</label>
+        <input id="currentPassword" type="password" class="cp-input" formControlName="currentPassword"
+               autocomplete="current-password"
+               [class.error]="passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid" />
+        @if (passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid) {
+          <span class="cp-error-msg">Informe a senha atual.</span>
+        }
+      </div>
+
+      <div class="cp-field" style="margin-top: 16px">
+        <label class="cp-label" for="profileNewPassword">Nova senha</label>
+        <input id="profileNewPassword" type="password" class="cp-input" formControlName="newPassword"
+               autocomplete="new-password"
+               [class.error]="passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid" />
+        @if (passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid) {
+          <span class="cp-error-msg">Use ao menos 8 caracteres, com letras e números.</span>
+        }
+      </div>
+
+      <div class="cp-field" style="margin-top: 16px">
+        <label class="cp-label" for="profileConfirmation">Repita a nova senha</label>
+        <input id="profileConfirmation" type="password" class="cp-input" formControlName="confirmation"
+               autocomplete="new-password"
+               [class.error]="passwordForm.controls.confirmation.touched && passwordForm.hasError('passwordMismatch')" />
+        @if (passwordForm.controls.confirmation.touched && passwordForm.hasError('passwordMismatch')) {
+          <span class="cp-error-msg">As senhas não coincidem.</span>
+        }
+      </div>
+
+      <div class="cp-form-actions">
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="savingPassword()">
+          {{ savingPassword() ? 'Salvando...' : 'Alterar senha' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

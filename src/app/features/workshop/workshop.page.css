@@ -1,0 +1,127 @@
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card-hint {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+  margin-bottom: 20px;
+}
+
+.readonly-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-hover);
+  color: var(--cp-text-secondary);
+  font-size: 14px;
+}
+.readonly-field mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.section-divider {
+  margin: 28px 0 20px;
+  border: none;
+  border-top: 1px solid var(--cp-border);
+}
+
+/* ------------------------------------------------------------------ logo */
+
+.logo-linha {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.logo-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-bg-card);
+  overflow: hidden;
+}
+
+.logo-preview.vazia {
+  background: var(--cp-bg-hover);
+  color: var(--cp-text-muted);
+}
+
+.logo-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo-controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/*
+ * O input de arquivo real fica escondido (.cp-visually-hidden); o rótulo se
+ * veste de botão, porque um <input type="file"> nativo não segue o resto da
+ * interface e cada navegador o desenha do seu jeito.
+ */
+.logo-escolher {
+  cursor: pointer;
+}
+
+
+/*
+ * Chave de permissão.
+ *
+ * O rótulo inteiro é clicável — alvo de toque grande é o que separa uma chave
+ * que se acerta de primeira de uma que se erra no celular. O texto embaixo diz
+ * o estado atual em palavras, e não só pela posição do controle: uma chave
+ * ligada e uma desligada se parecem demais para quem passa o olho.
+ */
+.chave {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius-sm);
+  cursor: pointer;
+}
+
+.chave:hover {
+  border-color: var(--cp-primary);
+}
+
+.chave-input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--cp-primary);
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.chave-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--cp-text);
+}
+
+.chave-dica {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}

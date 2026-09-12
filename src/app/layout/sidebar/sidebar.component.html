@@ -1,0 +1,26 @@
+<aside class="sidebar" [class.open]="open()" aria-label="Navegação principal">
+  <div class="brand">
+    <mat-icon class="brand-icon" aria-hidden="true">commute</mat-icon>
+    <div class="brand-text">
+      <span class="brand-name">CarPass</span>
+      @if (workshopName()) {
+        <span class="brand-workshop" [title]="workshopName()!">{{ workshopName() }}</span>
+      }
+    </div>
+  </div>
+
+  <nav class="nav">
+    @for (item of items(); track item.route) {
+      <a
+        class="nav-item"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        (click)="close.emit()"
+      >
+        <mat-icon aria-hidden="true">{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+</aside>

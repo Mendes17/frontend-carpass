@@ -1,0 +1,103 @@
+<cp-page-header title="Ordens de serviço" subtitle="O que está na oficina agora e em que etapa cada carro está.">
+  <a routerLink="/ordens/nova" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Abrir ordem
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por número, placa ou cliente" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por etapa">
+    <option value="">Todas as etapas</option>
+    @for (status of statuses; track status.value) {
+      <option [value]="status.value">{{ status.label }}</option>
+    }
+  </select>
+
+  <select class="cp-select filter-select" (change)="onMechanicFilter($event)" aria-label="Filtrar por mecânico">
+    <option value="">Todos os mecânicos</option>
+    @for (mechanic of mechanics(); track mechanic.id) {
+      <option [value]="mechanic.id">{{ mechanic.name }}</option>
+    }
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="receipt_long"
+      title="Nenhuma ordem de serviço encontrada"
+      description="Ajuste os filtros ou abra a primeira ordem para um veículo já cadastrado."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">OS</th>
+            <th scope="col">Veículo</th>
+            <th scope="col">Cliente</th>
+            <th scope="col">Etapa</th>
+            <th scope="col">Mecânico</th>
+            <th scope="col" class="cp-cell-numeric">Total</th>
+            <th scope="col">Aberta em</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of page().content; track order.id) {
+            <tr class="clickable-row" (click)="open(order)">
+              <td data-label="OS"><span class="order-number">#{{ order.number }}</span></td>
+              <td data-label="Veículo">
+                <span class="primary-cell">
+                  <span class="plate">{{ order.vehiclePlate }}</span>
+                  <span class="secondary-text">{{ order.vehicleDescription }}</span>
+                </span>
+              </td>
+              <td data-label="Cliente">{{ order.customerName }}</td>
+              <td data-label="Etapa">
+                <span class="badge-pair">
+                  <cp-status-badge [label]="order.statusLabel" [tone]="statusTone[order.status]" />
+                  @if (order.quoteStatus === 'PENDING' || order.quoteStatus === 'REJECTED') {
+                    <cp-status-badge
+                      [label]="'Orçamento: ' + order.quoteStatusLabel"
+                      [tone]="quoteTone[order.quoteStatus]"
+                    />
+                  }
+                </span>
+              </td>
+              <td data-label="Mecânico">{{ order.assignedMechanicName || '—' }}</td>
+              <td data-label="Total" class="cp-cell-numeric">
+                {{ order.totalAmount != null ? (order.totalAmount | currency: 'BRL') : '—' }}
+              </td>
+              <td data-label="Aberta em">{{ order.openedAt | date: 'dd/MM/yyyy' }}</td>
+              <td class="cp-cell-actions">
+                <button type="button" class="icon-action" (click)="open(order); $event.stopPropagation()"
+                        [attr.aria-label]="'Abrir a ordem de serviço número ' + order.number">
+                  <mat-icon aria-hidden="true">chevron_right</mat-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

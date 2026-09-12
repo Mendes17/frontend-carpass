@@ -1,0 +1,111 @@
+/* Estilos comuns às telas de listagem. */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/*
+ * .cp-select nasce com width:100% porque no formulário ele ocupa a coluna
+ * inteira da grade. Aqui ele é um filtro ao lado dos outros, então volta a ter
+ * largura de conteúdo — sem isto cada filtro reivindicava a linha inteira e a
+ * barra virava três linhas empilhadas mesmo em tela grande.
+ */
+.filter-select {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 170px;
+}
+
+/*
+ * A busca cresce com a tela, mas um campo de texto de 1000px não ajuda ninguém.
+ *
+ * O mínimo existe porque a tela de estoque, com quatro filtros, espremia a
+ * busca até o placeholder sair cortado — e um campo que não cabe a própria
+ * instrução deixa de instruir.
+ */
+.filters cp-search-input {
+  min-width: 260px;
+  max-width: 420px;
+}
+
+.list-card {
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+  overflow: hidden;
+}
+
+.loading-rows {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.primary-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.primary-text {
+  font-weight: 500;
+  color: var(--cp-text);
+}
+
+.secondary-text {
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--cp-radius-sm);
+  background: transparent;
+  color: var(--cp-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--cp-transition), color var(--cp-transition);
+}
+.icon-action:hover {
+  background: var(--cp-bg-hover);
+  color: var(--cp-text);
+}
+.icon-action:focus-visible {
+  outline: 2px solid var(--cp-border-focus);
+  outline-offset: -2px;
+}
+.icon-action mat-icon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+}
+
+.inactive-row {
+  opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-select {
+    width: 100%;
+  }
+}

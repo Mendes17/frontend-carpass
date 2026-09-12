@@ -1,0 +1,131 @@
+<cp-page-header [title]="title()" subtitle="Identificação, preços e ponto de reposição.">
+  <a routerLink="/pecas" class="cp-btn cp-btn-ghost">Voltar</a>
+</cp-page-header>
+
+<section class="cp-card form-card">
+  @if (loading()) {
+    <cp-skeleton height="24px" width="40%" />
+    <div style="height: 16px"></div>
+    <cp-skeleton height="180px" />
+  } @else {
+    @if (errorMessage()) {
+      <div class="cp-badge cp-badge-canceled" style="margin-bottom: 20px" role="alert">
+        <mat-icon aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">error_outline</mat-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2 class="form-section-title">Identificação</h2>
+      <p class="form-section-hint">Código e fabricante ajudam a achar a peça certa na hora do orçamento.</p>
+
+      <div class="cp-form-grid">
+        <div class="cp-field cp-field-full">
+          <label class="cp-label" for="name">Nome</label>
+          <input id="name" type="text" class="cp-input" formControlName="name"
+                 placeholder="Filtro de óleo"
+                 [class.error]="form.controls.name.touched && form.controls.name.invalid" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <span class="cp-error-msg">Informe o nome da peça.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="code">Código</label>
+          <input id="code" type="text" class="cp-input" formControlName="code" placeholder="Referência do fornecedor" />
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="manufacturer">Fabricante</label>
+          <input id="manufacturer" type="text" class="cp-input" formControlName="manufacturer"
+                 placeholder="Mobil, Bosch, NGK..." />
+          <span class="field-hint">A marca. É por aqui que o estoque agrupa as opções de um mesmo tipo.</span>
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="partTypeId">Tipo</label>
+          <select id="partTypeId" class="cp-select" formControlName="partTypeId">
+            <option [ngValue]="null">Sem tipo definido</option>
+            @for (type of types(); track type.id) {
+              <option [ngValue]="type.id">{{ type.name }}</option>
+            }
+          </select>
+          <span class="field-hint">
+            O que a peça é — "óleo de motor", não "óleo Mobil". Sem tipo ela continua no estoque, mas
+            fica de fora do filtro por tipo.
+          </span>
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <h2 class="form-section-title">Preços</h2>
+      <p class="form-section-hint">O preço de venda é o sugerido ao adicionar a peça em uma ordem.</p>
+
+      <div class="cp-form-grid">
+        <div class="cp-field">
+          <label class="cp-label" for="costPrice">Custo (R$)</label>
+          <input id="costPrice" type="number" min="0" step="0.01" class="cp-input" formControlName="costPrice"
+                 placeholder="0,00"
+                 [class.error]="form.controls.costPrice.touched && form.controls.costPrice.invalid" />
+          @if (form.controls.costPrice.touched && form.controls.costPrice.invalid) {
+            <span class="cp-error-msg">O custo não pode ser negativo.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="salePrice">Venda (R$)</label>
+          <input id="salePrice" type="number" min="0" step="0.01" class="cp-input" formControlName="salePrice"
+                 placeholder="0,00"
+                 [class.error]="form.controls.salePrice.touched && form.controls.salePrice.invalid" />
+          @if (form.controls.salePrice.touched && form.controls.salePrice.invalid) {
+            <span class="cp-error-msg">O preço de venda não pode ser negativo.</span>
+          }
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+      <h2 class="form-section-title">Estoque</h2>
+
+      <div class="cp-form-grid">
+        <div class="cp-field">
+          <label class="cp-label" for="minimumStock">Estoque mínimo</label>
+          <input id="minimumStock" type="number" min="0" step="1" class="cp-input" formControlName="minimumStock"
+                 [class.error]="form.controls.minimumStock.touched && form.controls.minimumStock.invalid" />
+          @if (form.controls.minimumStock.touched && form.controls.minimumStock.invalid) {
+            <span class="cp-error-msg">Informe um valor a partir de zero.</span>
+          } @else {
+            <span class="field-hint">A peça entra na lista de reposição ao chegar nesse saldo.</span>
+          }
+        </div>
+
+        @if (isEdit()) {
+          <div class="cp-field">
+            <span class="cp-label">Saldo atual</span>
+            <p class="readonly-stock">{{ currentStock() }}</p>
+            <span class="field-hint">
+              O saldo só muda por movimentação, na lista de peças. Assim toda alteração fica registrada com o motivo.
+            </span>
+          </div>
+        } @else {
+          <div class="cp-field">
+            <label class="cp-label" for="initialStock">Estoque inicial</label>
+            <input id="initialStock" type="number" min="0" step="1" class="cp-input" formControlName="initialStock"
+                   [class.error]="form.controls.initialStock.touched && form.controls.initialStock.invalid" />
+            @if (form.controls.initialStock.touched && form.controls.initialStock.invalid) {
+              <span class="cp-error-msg">Informe um valor a partir de zero.</span>
+            } @else {
+              <span class="field-hint">Vira a primeira entrada no histórico de movimentações.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="cp-form-actions">
+        <a routerLink="/pecas" class="cp-btn cp-btn-ghost">Cancelar</a>
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

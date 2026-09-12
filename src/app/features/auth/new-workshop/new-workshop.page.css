@@ -1,0 +1,119 @@
+/*
+ * Criar a própria oficina, já autenticado.
+ *
+ * Fica fora do shell pelo mesmo motivo da escolha de oficina: não há oficina
+ * escolhida ainda, então não haveria o que colocar no menu lateral.
+ */
+
+.area {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px 64px;
+  background: var(--cp-bg);
+}
+
+.cartao {
+  width: 100%;
+  max-width: 640px;
+  padding: 32px;
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+}
+
+.topo {
+  margin-bottom: 24px;
+}
+
+.marca {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cp-primary-fg);
+  letter-spacing: 0.5px;
+}
+
+.titulo {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--cp-text);
+  line-height: 1.3;
+}
+
+.subtitulo {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cp-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.alerta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: var(--cp-radius-sm);
+  background: var(--cp-danger-bg);
+  color: var(--cp-danger-fg);
+  font-size: 14px;
+}
+
+.alerta mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.divisor {
+  margin: 28px 0 20px;
+  border: none;
+  border-top: 1px solid var(--cp-border);
+}
+
+.secao {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+
+.secao-dica {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cp-border);
+}
+
+@media (max-width: 600px) {
+  .cartao {
+    padding: 24px 20px;
+  }
+
+  .titulo {
+    font-size: 19px;
+  }
+
+  /* No celular os botões ocupam a linha inteira: alvo de toque maior e sem
+     dois botões disputando a mesma linha estreita. */
+  .acoes {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

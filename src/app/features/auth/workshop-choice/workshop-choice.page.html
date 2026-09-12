@@ -1,0 +1,57 @@
+<div class="area">
+  <section class="cartao">
+    <header class="topo">
+      <span class="marca">CarPass</span>
+      <h1 class="titulo">Em qual oficina você quer entrar?</h1>
+      @if (user(); as pessoa) {
+        <p class="subtitulo">
+          Você tem acesso a {{ workshops().length }} oficinas com a conta
+          <strong>{{ pessoa.email }}</strong>.
+        </p>
+      }
+    </header>
+
+    @if (errorMessage()) {
+      <div class="alerta" role="alert">
+        <mat-icon aria-hidden="true">error_outline</mat-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <ul class="lista">
+      @for (opcao of workshops(); track opcao.workshopId) {
+        <li>
+          <button
+            type="button"
+            class="opcao"
+            [disabled]="!!entrando()"
+            [class.carregando]="entrando() === opcao.workshopId"
+            (click)="entrar(opcao)"
+          >
+            <span class="opcao-icone" aria-hidden="true">
+              <mat-icon>{{ iconeDoPapel(opcao) }}</mat-icon>
+            </span>
+            <span class="opcao-texto">
+              <span class="opcao-nome">{{ opcao.workshopName }}</span>
+              <!-- O papel vem junto porque a mesma pessoa pode ser dona de uma
+                   e mecânica em outra: o nome sozinho não diria em que pé ela
+                   está entrando. -->
+              <span class="opcao-papel">{{ opcao.roleLabel }}</span>
+            </span>
+            <mat-icon class="opcao-seta" aria-hidden="true">
+              {{ entrando() === opcao.workshopId ? 'hourglass_empty' : 'chevron_right' }}
+            </mat-icon>
+          </button>
+        </li>
+      }
+    </ul>
+
+    <footer class="rodape">
+      <a routerLink="/nova-oficina" class="cp-btn cp-btn-ghost">
+        <mat-icon aria-hidden="true">add_business</mat-icon>
+        Criar outra oficina
+      </a>
+      <button type="button" class="cp-btn cp-btn-ghost" (click)="sair()">Sair da conta</button>
+    </footer>
+  </section>
+</div>

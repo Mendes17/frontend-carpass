@@ -1,0 +1,106 @@
+/*
+ * O saldo é o dado que a pessoa vem procurar nesta tela, então ele fica em
+ * tabular-nums para as colunas alinharem e ganha destaque próprio quando está
+ * no mínimo ou abaixo dele. O aviso nunca é só cor: vem com ícone e texto.
+ */
+
+.stock-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--cp-text);
+}
+
+.stock-cell.low {
+  color: var(--cp-warning-fg);
+}
+
+.stock-cell mat-icon {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+}
+
+.stock-minimum {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--cp-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  /*
+   * No cartão a célula vira "rótulo à esquerda, valor à direita". Saldo e
+   * mínimo são dois elementos, então sem isto o flex os espalhava e o número
+   * ficava boiando no meio, longe do seu próprio rótulo. Aqui os dois voltam a
+   * ser um valor só.
+   */
+  .cp-table .stock-cell {
+    margin-left: auto;
+  }
+  .cp-table .stock-minimum {
+    display: inline;
+    margin-left: 8px;
+  }
+}
+
+/* ------------------------------------------------------- tipo e marca */
+
+/*
+ * O tipo é uma etiqueta, não texto corrido: ele repete muito na coluna, e em
+ * forma de etiqueta o olho agrupa as linhas do mesmo tipo sem precisar ler.
+ * Tom neutro de propósito — quem precisa chamar atenção nesta tela é o saldo
+ * baixo, e duas coisas gritando ao mesmo tempo não deixam nenhuma ser vista.
+ */
+.type-badge {
+  max-width: 100%;
+}
+
+/* Ausência de tipo é informação, não erro: fica discreto e legível. */
+.untyped {
+  color: var(--cp-text-secondary);
+  font-size: 13px;
+}
+
+/*
+ * Um <select> se dimensiona pela opção mais larga, não pela selecionada. Como
+ * as opções aqui saem do cadastro, uma única marca de nome comprido esticava o
+ * filtro e empurrava os outros para a linha de baixo — a barra virava duas
+ * fileiras por causa de uma linha do banco. O teto impede que o conteúdo mande
+ * no layout; a marca longa aparece truncada apenas com o campo fechado.
+ */
+.brand-select {
+  min-width: 170px;
+  max-width: 230px;
+}
+
+@media (max-width: 600px) {
+  /* No celular os filtros já são um por linha: o teto só deixaria este mais
+     curto que os vizinhos, sem resolver nada. */
+  .brand-select {
+    max-width: none;
+  }
+}
+
+/*
+ * Resposta em uma linha para "quais marcas eu tenho disso?". Fica acima da
+ * tabela porque é o resumo que a pessoa veio buscar; a tabela é o detalhe.
+ */
+.brand-summary {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--cp-border);
+  border-radius: 8px;
+  background: var(--cp-bg-card);
+  color: var(--cp-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.brand-summary strong {
+  color: var(--cp-text);
+}

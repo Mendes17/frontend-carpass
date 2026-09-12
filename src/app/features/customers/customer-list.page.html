@@ -1,0 +1,95 @@
+<cp-page-header title="Clientes" subtitle="Quem traz veículo para a sua oficina.">
+  <a routerLink="/clientes/novo" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Novo cliente
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por nome, documento, telefone ou e-mail" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativos</option>
+    <option value="false">Somente inativos</option>
+    <option value="">Todos</option>
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="people_outline"
+      title="Nenhum cliente encontrado"
+      description="Ajuste a busca ou cadastre o primeiro cliente da oficina."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Cliente</th>
+            <th scope="col">CPF / CNPJ</th>
+            <th scope="col">Contato</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of page().content; track customer.id) {
+            <tr [class.inactive-row]="!customer.active">
+              <td data-label="Cliente">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ customer.name }}</span>
+                  <span class="secondary-text">{{ customer.typeLabel }}</span>
+                </span>
+              </td>
+              <td data-label="CPF / CNPJ">{{ formatDocument(customer.document) }}</td>
+              <td data-label="Contato">
+                <span class="primary-cell">
+                  <span>{{ customer.phone || '—' }}</span>
+                  @if (customer.email) {
+                    <span class="secondary-text">{{ customer.email }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="customer.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ customer.active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  <button type="button" class="icon-action" (click)="edit(customer)"
+                          [attr.aria-label]="'Editar ' + customer.name">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(customer)"
+                          [attr.aria-label]="(customer.active ? 'Desativar ' : 'Reativar ') + customer.name">
+                    <mat-icon aria-hidden="true">{{ customer.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

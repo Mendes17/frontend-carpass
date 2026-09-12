@@ -1,0 +1,172 @@
+<!--
+  A folha do relatório financeiro. Tudo aqui sai na impressora, menos a barra
+  de ações, escondida pelo @media print.
+-->
+<div class="area">
+  @if (loading()) {
+    <p class="carregando">Montando o relatório…</p>
+  } @else if (errorMessage() && !summary()) {
+    <div class="folha">
+      <p role="alert">{{ errorMessage() }}</p>
+      <a routerLink="/financeiro" class="cp-btn cp-btn-ghost" style="margin-top: 16px">Voltar para o financeiro</a>
+    </div>
+  } @else {
+    @let of_ = workshop();
+    @let resumo = summary()!;
+
+    <!-- ====================================================== ações (não imprime) -->
+    <div class="acoes">
+      <a routerLink="/financeiro" class="cp-btn cp-btn-ghost">Voltar para o financeiro</a>
+      <button type="button" class="cp-btn cp-btn-primary" (click)="print()">Imprimir</button>
+      <span class="dica">No diálogo de impressão dá para salvar em PDF.</span>
+    </div>
+
+    <article class="folha">
+      <!-- =================================================== cabeçalho -->
+      <header class="topo">
+        <div class="oficina">
+          @if (of_?.logoUrl) {
+            <img class="oficina-logo" [src]="of_!.logoUrl" alt="" />
+          }
+          <div class="oficina-dados">
+            <h1 class="oficina-nome">{{ of_?.tradeName || 'Relatório financeiro' }}</h1>
+            @if (of_?.corporateName) {
+              <p class="oficina-linha">{{ of_!.corporateName }}</p>
+            }
+            @if (of_?.cnpj) {
+              <p class="oficina-linha">CNPJ {{ of_!.cnpj }}</p>
+            }
+            @if (formatAddress(of_?.address); as endereco) {
+              <p class="oficina-linha">{{ endereco }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="identificacao">
+          <span class="doc-rotulo">Relatório financeiro</span>
+          <strong class="doc-numero">{{ periodLabel() }}</strong>
+          <span class="doc-emissao">Emitido em {{ emittedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </header>
+
+      <!-- =================================================== resumo -->
+      <section class="bloco evita-quebra">
+        <h2 class="bloco-titulo">Resumo do período</h2>
+        <dl class="campos campos-resumo">
+          <div>
+            <dt>Faturamento bruto</dt>
+            <dd class="destaque">{{ resumo.grossRevenue | currency: 'BRL' }}</dd>
+          </div>
+          <div>
+            <dt>Despesas</dt>
+            <dd class="destaque">{{ resumo.expenses | currency: 'BRL' }}</dd>
+          </div>
+          <div>
+            <dt>Faturamento líquido</dt>
+            <dd class="destaque">{{ resumo.netRevenue | currency: 'BRL' }}</dd>
+          </div>
+          <div>
+            <dt>Ordens faturadas</dt>
+            <dd class="destaque">{{ resumo.orderCount }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- =================================================== comparação (mês) -->
+      @if (mode() === 'MONTH' && monthly(); as m) {
+        <section class="bloco evita-quebra">
+          <h2 class="bloco-titulo">Comparação com {{ m.previousLabel }}</h2>
+          <table class="itens">
+            <thead>
+              <tr>
+                <th scope="col">Indicador</th>
+                <th scope="col" class="num">{{ m.previousLabel }}</th>
+                <th scope="col" class="num">{{ m.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Faturamento bruto</td>
+                <td class="num">{{ m.previous.grossRevenue | currency: 'BRL' }}</td>
+                <td class="num">{{ m.summary.grossRevenue | currency: 'BRL' }}</td>
+              </tr>
+              <tr>
+                <td>Despesas</td>
+                <td class="num">{{ m.previous.expenses | currency: 'BRL' }}</td>
+                <td class="num">{{ m.summary.expenses | currency: 'BRL' }}</td>
+              </tr>
+              <tr>
+                <td>Resultado</td>
+                <td class="num">{{ m.previous.netRevenue | currency: 'BRL' }}</td>
+                <td class="num">{{ m.summary.netRevenue | currency: 'BRL' }}</td>
+              </tr>
+              <tr>
+                <td>Ordens faturadas</td>
+                <td class="num">{{ m.previous.orderCount }}</td>
+                <td class="num">{{ m.summary.orderCount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      }
+
+      <!-- =================================================== extremos (ano) -->
+      @if (mode() === 'YEAR' && annual(); as a) {
+        <section class="bloco evita-quebra">
+          <h2 class="bloco-titulo">Melhor e pior mês</h2>
+          @if (a.bestMonth; as melhor) {
+            <dl class="campos">
+              <div>
+                <dt>Maior faturamento</dt>
+                <dd>{{ melhor.label }} — {{ melhor.grossRevenue | currency: 'BRL' }}</dd>
+              </div>
+              @if (a.worstMonth; as pior) {
+                <div>
+                  <dt>Menor faturamento</dt>
+                  <dd>{{ pior.label }} — {{ pior.grossRevenue | currency: 'BRL' }}</dd>
+                </div>
+              }
+            </dl>
+          } @else {
+            <p class="texto">Nenhuma ordem foi entregue em {{ a.year }}.</p>
+          }
+        </section>
+      }
+
+      <!-- =================================================== categorias -->
+      <section class="bloco evita-quebra">
+        <h2 class="bloco-titulo">Despesas por categoria</h2>
+
+        @if (byCategory().length) {
+          <table class="itens">
+            <thead>
+              <tr>
+                <th scope="col">Categoria</th>
+                <th scope="col" class="num">Lançamentos</th>
+                <th scope="col" class="num">Fatia</th>
+                <th scope="col" class="num">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (categoria of byCategory(); track categoria.categoryId) {
+                <tr>
+                  <td>{{ categoria.categoryName }}</td>
+                  <td class="num">{{ categoria.count }}</td>
+                  <td class="num">{{ categoria.share | number: '1.0-1' }}%</td>
+                  <td class="num">{{ categoria.amount | currency: 'BRL' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="texto">Nenhuma despesa lançada no período.</p>
+        }
+      </section>
+
+      <footer class="rodape">
+        Relatório financeiro · {{ periodLabel() }} · {{ of_?.tradeName || '' }} · emitido em
+        {{ emittedAt | date: 'dd/MM/yyyy HH:mm' }}
+      </footer>
+    </article>
+  }
+</div>

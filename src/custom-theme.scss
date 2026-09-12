@@ -1,0 +1,155 @@
+/**
+ * CarPass - Sistema de tema com Angular Material 3
+ * Implementa Light/Dark theme via CSS custom properties
+ * Paleta principal: Violet com acentos em Cyan
+ */
+@use '@angular/material' as mat;
+
+/* Angular Material Theme Base */
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$violet-palette,
+      tertiary: mat.$cyan-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+/* ===== CSS Custom Properties - Light Theme (padrão) ===== */
+:root,
+body.light-theme {
+  --cp-primary: #6C3CE0;
+  --cp-primary-hover: #5A2DC7;
+  --cp-primary-light: #EDE7FB;
+  --cp-primary-rgb: 108, 60, 224;
+
+  --cp-bg: #F5F7FA;
+  --cp-bg-card: #FFFFFF;
+  --cp-bg-sidebar: #FFFFFF;
+  --cp-bg-navbar: #FFFFFF;
+  --cp-bg-input: #FFFFFF;
+  --cp-bg-hover: #F0ECFA;
+  --cp-bg-skeleton: #E8E8E8;
+
+  --cp-text: #1A1A2E;
+  --cp-text-secondary: #6B7280;
+  /* #9CA3AF ficava em 2,54:1 sobre o branco e reprovava como texto. */
+  --cp-text-muted: #6B7280;
+  --cp-text-on-primary: #FFFFFF;
+
+  --cp-border: #E5E7EB;
+  --cp-border-focus: #6C3CE0;
+  --cp-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /*
+   * Cada estado tem duas cores com papéis diferentes:
+   *   --cp-<x>        marca (ícone, barra, borda) — precisa de 3:1 contra o cartão
+   *   --cp-<x>-fg     texto sobre o fundo tingido — precisa de 4,5:1 contra --cp-<x>-bg
+   * Os valores de texto foram medidos, não escolhidos no olho: o verde original
+   * ficava em 2,41:1 e o amarelo em 2,07:1 sobre o próprio fundo.
+   */
+  --cp-success: #10B981;
+  --cp-success-bg: #ECFDF5;
+  --cp-success-fg: #047857; /* 5,21:1 */
+  --cp-warning: #F59E0B;
+  --cp-warning-bg: #FFFBEB;
+  --cp-warning-fg: #B45309; /* 4,84:1 */
+  --cp-danger: #EF4444;
+  --cp-danger-bg: #FEF2F2;
+  --cp-danger-fg: #B91C1C; /* 5,91:1 */
+  --cp-info: #3B82F6;
+  --cp-info-bg: #EFF6FF;
+  --cp-info-fg: #1D4ED8; /* 6,16:1 */
+  --cp-primary-fg: #6C3CE0; /* 5,19:1 sobre --cp-primary-light */
+
+  /*
+   * Cores de série dos gráficos financeiros.
+   *
+   * Não são as cores de estado: despesa não é erro, e pintá-la de vermelho
+   * gastaria o vermelho que o sistema reserva para "algo deu errado". Este par
+   * foi validado, não escolhido no olho — separação sob daltonismo de ΔE 31,2
+   * (protanopia) e 27,8 (tritanopia), com contraste acima de 3:1 sobre o cartão.
+   * Trocar um dos dois pede validar de novo.
+   */
+  --cp-chart-gross: #6C3CE0;
+  --cp-chart-expense: #C2410C;
+  --cp-neutral-bg: #F3F4F6;
+  --cp-neutral-fg: #4B5563; /* 6,87:1 */
+
+  --cp-sidebar-width: 260px;
+  --cp-navbar-height: 64px;
+  --cp-radius: 12px;
+  --cp-radius-sm: 8px;
+  --cp-radius-lg: 16px;
+  --cp-transition: 0.2s ease;
+
+  color-scheme: light;
+}
+
+/* ===== CSS Custom Properties - Dark Theme ===== */
+body.dark-theme {
+  --cp-primary: #9B7AEA;
+  --cp-primary-hover: #B49AEF;
+  --cp-primary-light: #2D2347;
+  --cp-primary-rgb: 155, 122, 234;
+
+  --cp-bg: #0F1117;
+  --cp-bg-card: #1A1D2E;
+  --cp-bg-sidebar: #141623;
+  --cp-bg-navbar: #141623;
+  --cp-bg-input: #1E2135;
+  --cp-bg-hover: #252840;
+  --cp-bg-skeleton: #252840;
+
+  --cp-text: #E5E7EB;
+  --cp-text-secondary: #9CA3AF;
+  /* #6B7280 ficava em 3,45:1 sobre o cartão escuro. */
+  --cp-text-muted: #8B93A7;
+  --cp-text-on-primary: #FFFFFF;
+
+  --cp-border: #2D3148;
+  --cp-border-focus: #9B7AEA;
+  --cp-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --cp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --cp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+  /* O modo escuro tem os próprios passos, medidos contra as superfícies escuras.
+     Não é a inversão automática do tema claro. */
+  --cp-success: #34D399;
+  --cp-success-bg: #064E3B;
+  --cp-success-fg: #34D399; /* 5,06:1 */
+  --cp-warning: #FBBF24;
+  --cp-warning-bg: #78350F;
+  --cp-warning-fg: #FBBF24; /* 5,43:1 */
+  --cp-danger: #F87171;
+  --cp-danger-bg: #7F1D1D;
+  --cp-danger-fg: #FCA5A5; /* 5,28:1 */
+  --cp-info: #60A5FA;
+  --cp-info-bg: #1E3A5F;
+  --cp-info-fg: #60A5FA; /* 4,52:1 */
+  --cp-primary-fg: #B49AEF; /* 6,10:1 sobre --cp-primary-light */
+
+  /* Passos próprios do modo escuro, medidos contra o cartão escuro (#1A1D2E),
+     não a inversão automática dos claros. ΔE 28,2 em protanopia. */
+  --cp-chart-gross: #9B7AEA;
+  --cp-chart-expense: #D97706;
+  --cp-neutral-bg: #252840;
+  --cp-neutral-fg: #CBD5E1; /* 9,71:1 */
+
+  color-scheme: dark;
+}
+
+/* ===== Estilos globais do body ===== */
+body {
+  background-color: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  transition: background-color var(--cp-transition), color var(--cp-transition);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

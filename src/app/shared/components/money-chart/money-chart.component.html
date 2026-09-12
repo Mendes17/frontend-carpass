@@ -1,0 +1,86 @@
+@if (series().length > 1) {
+  <!-- Legenda sempre presente com duas séries ou mais: a identidade não pode
+       depender só da cor. -->
+  <ul class="legenda">
+    @for (serie of series(); track serie.name) {
+      <li class="legenda-item">
+        <span class="marca" [style.background]="'var(' + serie.colorVar + ')'" aria-hidden="true"></span>
+        {{ serie.name }}
+      </li>
+    }
+  </ul>
+}
+
+<div class="area" [class.com-negativo]="hasNegative()" aria-hidden="true">
+  @if (hasNegative()) {
+    <span class="linha-zero"></span>
+  }
+
+  @for (ponto of points(); track ponto.label + $index; let i = $index) {
+    <div
+      class="coluna"
+      tabindex="0"
+      [class.ativa]="hovered() === i"
+      (mouseenter)="hovered.set(i)"
+      (mouseleave)="hovered.set(null)"
+      (focus)="hovered.set(i)"
+      (blur)="hovered.set(null)"
+    >
+      <div class="barras">
+        @for (serie of series(); track serie.name; let s = $index) {
+          <span
+            class="barra"
+            [class.negativa]="isNegative(ponto.values[s])"
+            [style.height.%]="heightOf(ponto.values[s])"
+            [style.background]="colorOf(serie, ponto.values[s])"
+          ></span>
+        }
+      </div>
+
+      <span class="rotulo">{{ ponto.label }}</span>
+
+      @if (hovered() === i) {
+        <div class="dica" role="presentation">
+          <strong class="dica-titulo">{{ ponto.label }}</strong>
+          @for (serie of series(); track serie.name; let s = $index) {
+            <span class="dica-linha">
+              <span class="marca" [style.background]="colorOf(serie, ponto.values[s])"></span>
+              {{ serie.name }}
+              <strong>{{ ponto.values[s] | currency: 'BRL' }}</strong>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (isEmpty()) {
+  <p class="vazio" role="status">Nenhum lançamento neste período.</p>
+}
+
+<!--
+  A tabela é a versão de verdade dos dados: leitor de tela, impressão e alto
+  contraste funcionam por ela, sem depender de cor nem de hover.
+-->
+<table class="cp-visually-hidden">
+  <caption>{{ caption() }}</caption>
+  <thead>
+    <tr>
+      <th scope="col">Período</th>
+      @for (serie of series(); track serie.name) {
+        <th scope="col">{{ serie.name }}</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (ponto of points(); track ponto.label + $index) {
+      <tr>
+        <th scope="row">{{ ponto.label }}</th>
+        @for (serie of series(); track serie.name; let s = $index) {
+          <td>{{ ponto.values[s] | currency: 'BRL' }}</td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

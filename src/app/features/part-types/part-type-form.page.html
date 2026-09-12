@@ -1,0 +1,55 @@
+<cp-page-header [title]="title()" subtitle="Descreva o que a peça é, não quem a fabrica.">
+  <a routerLink="/tipos-de-peca" class="cp-btn cp-btn-ghost">Voltar</a>
+</cp-page-header>
+
+<section class="cp-card form-card">
+  @if (loading()) {
+    <cp-skeleton height="24px" width="40%" />
+    <div style="height: 16px"></div>
+    <cp-skeleton height="140px" />
+  } @else {
+    @if (errorMessage()) {
+      <div class="cp-badge cp-badge-canceled" style="margin-bottom: 20px" role="alert">
+        <mat-icon aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">error_outline</mat-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2 class="form-section-title">Dados do tipo</h2>
+      <p class="form-section-hint">
+        "Óleo de motor", não "Óleo Mobil". A marca fica na peça — é essa separação que permite ver, de
+        uma vez, todas as marcas de um mesmo item que a oficina tem em estoque.
+      </p>
+
+      <div class="cp-field">
+        <label class="cp-label" for="name">Nome</label>
+        <input id="name" type="text" class="cp-input" formControlName="name"
+               placeholder="Óleo de motor"
+               [class.error]="form.controls.name.touched && form.controls.name.invalid" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <span class="cp-error-msg">Informe o nome do tipo (até 80 caracteres).</span>
+        }
+      </div>
+
+      <hr class="section-divider" />
+
+      <div class="cp-field">
+        <label class="cp-label" for="description">Descrição</label>
+        <textarea id="description" class="cp-input cp-textarea" formControlName="description"
+                  placeholder="Lubrificante do motor, mineral, semissintético ou sintético."></textarea>
+        <span class="field-hint">
+          Ajuda a distinguir tipos vizinhos. "Óleo de motor" e "óleo de câmbio" só parecem óbvios para
+          quem já sabe.
+        </span>
+      </div>
+
+      <div class="cp-form-actions">
+        <a routerLink="/tipos-de-peca" class="cp-btn cp-btn-ghost">Cancelar</a>
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

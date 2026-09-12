@@ -1,0 +1,71 @@
+/*
+ * Lista de despesas.
+ *
+ * O total do período fica acima da tabela porque é a resposta; a tabela é o
+ * detalhe de como se chegou nele.
+ */
+
+.resumo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-border);
+  border-radius: var(--cp-radius);
+  box-shadow: var(--cp-shadow);
+}
+
+.resumo-rotulo {
+  font-size: 13px;
+  color: var(--cp-text-secondary);
+}
+
+.resumo-valor {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cp-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumo-contagem {
+  font-size: 12px;
+  color: var(--cp-text-secondary);
+  margin-left: auto;
+}
+
+/* Campo de data como filtro: sem isto ele reivindicaria a linha inteira, como
+   acontece com o .cp-select. */
+.data-filtro {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 150px;
+}
+
+.valor {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/*
+ * Excluir é a única ação irreversível desta tela. O vermelho fica no ícone, não
+ * no fundo: destaca sem virar a coisa mais chamativa da linha.
+ */
+.icon-action.perigo:hover {
+  color: var(--cp-danger-fg);
+}
+
+@media (max-width: 600px) {
+  .resumo-contagem {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .data-filtro {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}

@@ -1,0 +1,104 @@
+<cp-page-header title="Veículos" subtitle="Todo carro que passa pela oficina.">
+  <a routerLink="/veiculos/novo" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Novo veículo
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por placa, marca, modelo ou cliente" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativos</option>
+    <option value="false">Somente inativos</option>
+    <option value="">Todos</option>
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="directions_car"
+      title="Nenhum veículo encontrado"
+      description="Ajuste a busca ou cadastre o primeiro veículo."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Placa</th>
+            <th scope="col">Veículo</th>
+            <th scope="col">Cliente</th>
+            <th scope="col" class="cp-cell-numeric">Km</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vehicle of page().content; track vehicle.id) {
+            <tr [class.inactive-row]="!vehicle.active">
+              <td data-label="Placa"><strong>{{ formatPlate(vehicle.plate) }}</strong></td>
+              <td data-label="Veículo">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ vehicle.brand }} {{ vehicle.model }}</span>
+                  <span class="secondary-text">
+                    {{ vehicle.modelYear || vehicle.manufactureYear || '—' }}
+                    @if (vehicle.color) {
+                      · {{ vehicle.color }}
+                    }
+                    @if (vehicle.fuelTypeLabel) {
+                      · {{ vehicle.fuelTypeLabel }}
+                    }
+                  </span>
+                </span>
+              </td>
+              <td data-label="Cliente">{{ vehicle.customerName }}</td>
+              <td data-label="Km" class="cp-cell-numeric">
+                {{ vehicle.mileage !== null ? (vehicle.mileage | number) : '—' }}
+              </td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="vehicle.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ vehicle.active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  <button type="button" class="icon-action" (click)="openHistory(vehicle)"
+                          [attr.aria-label]="'Histórico do veículo ' + vehicle.plate">
+                    <mat-icon aria-hidden="true">history</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="edit(vehicle)"
+                          [attr.aria-label]="'Editar veículo ' + vehicle.plate">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(vehicle)"
+                          [attr.aria-label]="(vehicle.active ? 'Desativar ' : 'Reativar ') + vehicle.plate">
+                    <mat-icon aria-hidden="true">{{ vehicle.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

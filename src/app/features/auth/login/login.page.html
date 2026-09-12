@@ -1,0 +1,71 @@
+<h1 class="auth-title">Entrar</h1>
+<p class="auth-subtitle">Acesse o painel da sua oficina.</p>
+
+@if (errorMessage()) {
+  <div class="auth-alert" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="cp-field">
+    <label class="cp-label" for="email">E-mail</label>
+    <input
+      id="email"
+      type="email"
+      class="cp-input"
+      formControlName="email"
+      autocomplete="username"
+      placeholder="voce@suaoficina.com.br"
+      [class.error]="form.controls.email.touched && form.controls.email.invalid"
+    />
+    @if (form.controls.email.touched && form.controls.email.invalid) {
+      <span class="cp-error-msg">
+        {{ form.controls.email.hasError('required') ? 'Informe seu e-mail.' : 'E-mail inválido.' }}
+      </span>
+    }
+  </div>
+
+  <div class="cp-field">
+    <label class="cp-label" for="password">Senha</label>
+    <div class="input-with-action">
+      <input
+        id="password"
+        [type]="showPassword() ? 'text' : 'password'"
+        class="cp-input"
+        formControlName="password"
+        autocomplete="current-password"
+        [class.error]="form.controls.password.touched && form.controls.password.invalid"
+      />
+      <button
+        type="button"
+        class="input-action"
+        (click)="showPassword.set(!showPassword())"
+        [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'"
+      >
+        <mat-icon aria-hidden="true">{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </div>
+    @if (form.controls.password.touched && form.controls.password.invalid) {
+      <span class="cp-error-msg">Informe sua senha.</span>
+    }
+  </div>
+
+  <div class="auth-row">
+    <a routerLink="/recuperar-senha" class="auth-link">Esqueci minha senha</a>
+  </div>
+
+  <button type="submit" class="cp-btn cp-btn-primary cp-btn-block" [disabled]="loading()">
+    {{ loading() ? 'Entrando...' : 'Entrar' }}
+  </button>
+</form>
+
+@if (loading()) {
+  <cp-loading [overlay]="true" message="Entrando..." />
+}
+
+<p class="auth-footer">
+  Ainda não tem conta?
+  <a routerLink="/criar-conta" class="auth-link">Cadastre sua oficina</a>
+</p>

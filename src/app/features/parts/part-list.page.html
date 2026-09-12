@@ -1,0 +1,169 @@
+<cp-page-header title="Peças" subtitle="Estoque, preços e reposição.">
+  @if (canManage()) {
+    <a routerLink="/pecas/nova" class="cp-btn cp-btn-primary">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Nova peça
+    </a>
+  }
+</cp-page-header>
+
+<div class="filters">
+  <!-- Placeholder curto de propósito: com cinco filtros na barra, um texto mais
+       longo sai cortado — e a busca por marca virou filtro próprio ao lado. -->
+  <cp-search-input placeholder="Buscar por nome ou código" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onTypeFilter($event)" aria-label="Filtrar por tipo de peça">
+    <option value="">Todos os tipos</option>
+    @for (type of types(); track type.id) {
+      <option [value]="type.id">{{ type.name }}</option>
+    }
+  </select>
+
+  <!--
+    A lista de marcas acompanha o tipo escolhido: com "óleo de motor"
+    selecionado, aqui ficam exatamente as marcas de óleo de motor que a oficina
+    tem. O saldo vai no rótulo porque saber que sobrou 1 litro de uma e 24 de
+    outra é a parte útil da resposta.
+  -->
+  <select class="cp-select filter-select brand-select" (change)="onBrandFilter($event)"
+          [value]="query().brand ?? ''" aria-label="Filtrar por marca">
+    <option value="">Todas as marcas</option>
+    @for (brand of brands(); track brand.name) {
+      <option [value]="brand.name">{{ brand.name }} ({{ brand.stockQuantity }})</option>
+    }
+  </select>
+
+  <select class="cp-select filter-select" (change)="onStockFilter($event)" aria-label="Filtrar por estoque">
+    <option value="">Todo o estoque</option>
+    <option value="low">Só o que precisa repor</option>
+  </select>
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativas</option>
+    <option value="false">Somente inativas</option>
+    <option value="">Todas</option>
+  </select>
+</div>
+
+@if (query().typeId && !loading()) {
+  <!--
+    O resumo só aparece com um tipo escolhido, que é quando a pessoa está
+    fazendo a pergunta "quais marcas eu tenho disso?". Responder com números
+    antes da tabela evita ter que contar linha por linha.
+  -->
+  <p class="brand-summary" role="status">
+    @if (brands().length === 0) {
+      Nenhuma peça deste tipo tem marca cadastrada.
+    } @else {
+      {{ brands().length === 1 ? '1 marca' : brands().length + ' marcas' }} deste tipo em estoque:
+      @for (brand of brands(); track brand.name; let last = $last) {
+        <strong>{{ brand.name }}</strong> ({{ brand.stockQuantity }}){{ last ? '' : ' · ' }}
+      }
+    }
+  </p>
+}
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="inventory_2"
+      title="Nenhuma peça encontrada"
+      description="Cadastre as peças que a oficina mantém em estoque para acompanhar a reposição."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Peça</th>
+            <th scope="col">Tipo</th>
+            <th scope="col" class="cp-cell-numeric">Custo</th>
+            <th scope="col" class="cp-cell-numeric">Venda</th>
+            <th scope="col" class="cp-cell-numeric">Estoque</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (part of page().content; track part.id) {
+            <tr [class.inactive-row]="!part.active">
+              <td data-label="Peça">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ part.name }}</span>
+                  <span class="secondary-text">
+                    {{ part.code || 'Sem código' }}@if (part.manufacturer) { · {{ part.manufacturer }} }
+                  </span>
+                </span>
+              </td>
+              <td data-label="Tipo">
+                @if (part.partTypeName) {
+                  <span class="cp-badge cp-badge-neutral type-badge">{{ part.partTypeName }}</span>
+                } @else {
+                  <span class="untyped">Sem tipo</span>
+                }
+              </td>
+              <td data-label="Custo" class="cp-cell-numeric">
+                {{ part.costPrice != null ? (part.costPrice | currency: 'BRL' : 'symbol' : '1.2-2') : '—' }}
+              </td>
+              <td data-label="Venda" class="cp-cell-numeric">
+                {{ part.salePrice != null ? (part.salePrice | currency: 'BRL' : 'symbol' : '1.2-2') : '—' }}
+              </td>
+              <td data-label="Estoque" class="cp-cell-numeric">
+                <span class="stock-cell" [class.low]="part.belowMinimumStock">
+                  @if (part.belowMinimumStock) {
+                    <mat-icon aria-hidden="true">warning_amber</mat-icon>
+                  }
+                  {{ part.stockQuantity }}
+                  @if (part.belowMinimumStock) {
+                    <span class="cp-visually-hidden">— repor</span>
+                  }
+                </span>
+                <span class="stock-minimum">mín. {{ part.minimumStock }}</span>
+              </td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="part.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ part.active ? 'Ativa' : 'Inativa' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  @if (part.active) {
+                    <button type="button" class="icon-action" (click)="moveStock(part)"
+                            [attr.aria-label]="'Movimentar estoque de ' + part.name">
+                      <mat-icon aria-hidden="true">swap_vert</mat-icon>
+                    </button>
+                  }
+                  <button type="button" class="icon-action" (click)="edit(part)"
+                          [attr.aria-label]="'Editar ' + part.name">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(part)"
+                          [attr.aria-label]="(part.active ? 'Desativar ' : 'Reativar ') + part.name">
+                    <mat-icon aria-hidden="true">{{ part.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

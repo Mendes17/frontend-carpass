@@ -1,0 +1,54 @@
+<cp-page-header [title]="title()" subtitle="Como o gasto aparece agrupado no financeiro.">
+  <a routerLink="/despesas/categorias" class="cp-btn cp-btn-ghost">Voltar</a>
+</cp-page-header>
+
+<section class="cp-card form-card">
+  @if (loading()) {
+    <cp-skeleton height="24px" width="40%" />
+    <div style="height: 16px"></div>
+    <cp-skeleton height="140px" />
+  } @else {
+    @if (errorMessage()) {
+      <div class="cp-badge cp-badge-canceled" style="margin-bottom: 20px" role="alert">
+        <mat-icon aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">error_outline</mat-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2 class="form-section-title">Dados da categoria</h2>
+      <p class="form-section-hint">
+        Categorias demais fazem o gráfico virar uma lista de fatias de 2%. Use as que você realmente
+        acompanha, e deixe o resto em "Outros".
+      </p>
+
+      <div class="cp-field">
+        <label class="cp-label" for="name">Nome</label>
+        <input id="name" type="text" class="cp-input" formControlName="name"
+               placeholder="Energia elétrica"
+               [class.error]="form.controls.name.touched && form.controls.name.invalid" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <span class="cp-error-msg">Informe o nome da categoria (até 80 caracteres).</span>
+        }
+      </div>
+
+      <hr class="section-divider" />
+
+      <div class="cp-field">
+        <label class="cp-label" for="description">Descrição</label>
+        <textarea id="description" class="cp-input cp-textarea" formControlName="description"
+                  placeholder="Conta de luz."></textarea>
+        <span class="field-hint">
+          Ajuda a decidir onde lançar quando duas categorias parecem servir.
+        </span>
+      </div>
+
+      <div class="cp-form-actions">
+        <a routerLink="/despesas/categorias" class="cp-btn cp-btn-ghost">Cancelar</a>
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

@@ -1,0 +1,364 @@
+@if (loading()) {
+  <cp-skeleton height="32px" width="40%" />
+  <div style="height: 20px"></div>
+  <cp-skeleton height="320px" />
+} @else if (!order()) {
+  <section class="cp-card">
+    <p role="alert">{{ errorMessage() || 'Ordem de serviço não encontrada.' }}</p>
+    <a routerLink="/ordens" class="cp-btn cp-btn-ghost" style="margin-top: 16px">Voltar para a lista</a>
+  </section>
+} @else {
+  @let os = order()!;
+
+  <cp-page-header [title]="'Ordem de serviço #' + os.number" [subtitle]="os.vehiclePlate + ' · ' + os.customerName">
+    @if (canPrintQuote()) {
+      <!-- O caminho físico do orçamento: para quem não se entende com o celular,
+           para quem quer levar a proposta para casa, e para a oficina que prefere
+           entregar o papel no balcão. -->
+      <a [routerLink]="['/ordens', os.id, 'orcamento']" class="cp-btn cp-btn-ghost">
+        <mat-icon aria-hidden="true">description</mat-icon>
+        Imprimir orçamento
+      </a>
+    }
+    @if (canPrint()) {
+      <!-- Aparece só com o serviço pronto: antes disso a folha ainda mudaria,
+           e imprimir versão que vai mudar é o começo de duas verdades. -->
+      <a [routerLink]="['/ordens', os.id, 'imprimir']" class="cp-btn cp-btn-secondary">
+        <mat-icon aria-hidden="true">print</mat-icon>
+        Imprimir OS
+      </a>
+    }
+    <a routerLink="/ordens" class="cp-btn cp-btn-ghost">Voltar</a>
+  </cp-page-header>
+
+  <!-- ============================================ etapa e ações -->
+  <section class="cp-card status-bar">
+    <div class="status-now">
+      <span class="status-label">Etapa atual</span>
+      <cp-status-badge [label]="os.statusLabel" [tone]="statusTone[os.status]" />
+      <cp-status-badge [label]="'Orçamento: ' + os.quoteStatusLabel" [tone]="quoteTone[os.quoteStatus]" />
+    </div>
+
+    <div class="status-actions">
+      @for (status of nextStatuses(); track status) {
+        <button type="button" class="cp-btn cp-btn-secondary" [disabled]="working()"
+                (click)="changeStatus(status)">
+          {{ statusLabels[status] }}
+        </button>
+      }
+      @if (canDeliver()) {
+        <button type="button" class="cp-btn cp-btn-primary" [disabled]="working()" (click)="deliver()">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
+          Entregar
+        </button>
+      }
+      @if (canCancel()) {
+        <!-- Cancelar é irreversível e raro: fica discreto para não competir com o
+             caminho normal do atendimento. O vermelho vai no texto, não no fundo,
+             para o botão não virar a coisa mais chamativa da tela. -->
+        <button type="button" class="cp-btn cp-btn-ghost danger-text" [disabled]="working()" (click)="cancel()">
+          Cancelar ordem
+        </button>
+      }
+      @if (!nextStatuses().length && !canDeliver() && !canCancel()) {
+        <p class="closed-note">Esta ordem está encerrada e não se move mais.</p>
+      }
+    </div>
+  </section>
+
+  @if (!os.editable) {
+    <p class="locked-note" role="status">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      Os itens estão travados porque o orçamento foi aprovado. Para mudar valores, reabra o orçamento —
+      a reabertura fica registrada.
+    </p>
+  }
+
+  <div class="detail-grid">
+    <!-- ============================================ coluna principal -->
+    <div class="main-column">
+      <!-- itens -->
+      <section class="cp-card">
+        <header class="card-head">
+          <h2 class="card-title">Serviços e peças</h2>
+          @if (os.editable) {
+            <button type="button" class="cp-btn cp-btn-primary" [disabled]="working()" (click)="addItem()">
+              <mat-icon aria-hidden="true">add</mat-icon>
+              Adicionar item
+            </button>
+          }
+        </header>
+
+        @if (!os.items.length) {
+          <p class="empty-note">
+            Nenhum item ainda. Adicione os serviços do catálogo e as peças do estoque que este carro precisa.
+          </p>
+        } @else {
+          <div class="cp-table-wrap">
+            <table class="cp-table">
+              <thead>
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col" class="cp-cell-numeric">Qtd.</th>
+                  <th scope="col" class="cp-cell-numeric">Unitário</th>
+                  <th scope="col" class="cp-cell-numeric">Total</th>
+                  <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of os.items; track item.id) {
+                  <tr>
+                    <td data-label="Item"><span class="item-desc">{{ item.description }}</span></td>
+                    <td data-label="Tipo">
+                      <span class="type-chip">
+                        <mat-icon aria-hidden="true">{{ item.type === 'PART' ? 'inventory_2' : 'build' }}</mat-icon>
+                        {{ item.typeLabel }}
+                      </span>
+                    </td>
+                    <td data-label="Qtd." class="cp-cell-numeric">{{ item.quantity }}</td>
+                    <td data-label="Unitário" class="cp-cell-numeric">{{ item.unitPrice | currency: 'BRL' }}</td>
+                    <td data-label="Total" class="cp-cell-numeric">{{ item.totalPrice | currency: 'BRL' }}</td>
+                    <td class="cp-cell-actions">
+                      @if (os.editable) {
+                        <span class="row-actions">
+                          <button type="button" class="icon-action" (click)="editItem(item)"
+                                  [attr.aria-label]="'Editar ' + item.description">
+                            <mat-icon aria-hidden="true">edit</mat-icon>
+                          </button>
+                          <button type="button" class="icon-action" (click)="removeItem(item)"
+                                  [attr.aria-label]="'Remover ' + item.description">
+                            <mat-icon aria-hidden="true">delete_outline</mat-icon>
+                          </button>
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <dl class="totals">
+            <div><dt>Serviços</dt><dd>{{ (os.servicesTotal || 0) | currency: 'BRL' }}</dd></div>
+            <div><dt>Peças</dt><dd>{{ (os.partsTotal || 0) | currency: 'BRL' }}</dd></div>
+            @if (os.discount) {
+              <div><dt>Desconto</dt><dd class="discount">− {{ os.discount | currency: 'BRL' }}</dd></div>
+            }
+            <div class="grand"><dt>Total</dt><dd>{{ (os.totalAmount || 0) | currency: 'BRL' }}</dd></div>
+          </dl>
+        }
+      </section>
+
+      <!-- orçamento -->
+      <section class="cp-card">
+        <header class="card-head">
+          <h2 class="card-title">Orçamento</h2>
+          <cp-status-badge [label]="os.quoteStatusLabel" [tone]="quoteTone[os.quoteStatus]" />
+        </header>
+
+        <p class="quote-hint">
+          @switch (os.quoteStatus) {
+            @case ('NOT_REQUIRED') {
+              Nem todo serviço precisa de aprovação prévia. Se este precisar, envie os valores para o cliente.
+            }
+            @case ('PENDING') {
+              Os valores foram enviados e a ordem aguarda a resposta do cliente.
+            }
+            @case ('APPROVED') {
+              O cliente aprovou. Os itens estão travados para que o combinado não mude sem registro.
+            }
+            @case ('REJECTED') {
+              O cliente recusou. A ordem voltou para revisão — ajuste os itens e envie de novo.
+            }
+          }
+        </p>
+
+        @if (os.quoteStatus === 'REJECTED') {
+          <!-- O motivo é o que decide o próximo passo: baixar preço, tirar item
+               ou ligar para o cliente. Fica aqui, e não só na linha do tempo. -->
+          <div class="motivo-recusa">
+            <span class="motivo-rotulo">Motivo da recusa</span>
+            @if (os.quoteRejectionReason) {
+              <p class="motivo-texto">{{ os.quoteRejectionReason }}</p>
+            } @else {
+              <p class="motivo-texto sem-motivo">
+                O cliente recusou sem informar o motivo. Vale ligar para entender o que pesou.
+              </p>
+            }
+          </div>
+        }
+
+        <div class="quote-actions">
+          @if (os.quoteStatus === 'NOT_REQUIRED' || os.quoteStatus === 'REJECTED') {
+            <button type="button" class="cp-btn cp-btn-primary" [disabled]="working() || !os.items.length"
+                    (click)="submitQuote()">
+              <mat-icon aria-hidden="true">send</mat-icon>
+              Enviar ao cliente
+            </button>
+            @if (!os.items.length) {
+              <span class="field-hint">Adicione ao menos um item antes de enviar.</span>
+            }
+          }
+          @if (os.quoteStatus === 'PENDING') {
+            <!-- Reenviar não é decidir: fica com o balcão, para o caso do
+                 e-mail que não chegou ou foi para o endereço errado. -->
+            <button type="button" class="cp-btn cp-btn-secondary" [disabled]="working()" (click)="resendQuote()">
+              <mat-icon aria-hidden="true">forward_to_inbox</mat-icon>
+              Reenviar ao cliente
+            </button>
+            @if (canDecideQuote()) {
+              <button type="button" class="cp-btn cp-btn-primary" [disabled]="working()" (click)="approveQuote()">
+                Cliente aprovou
+              </button>
+              <button type="button" class="cp-btn cp-btn-secondary" [disabled]="working()" (click)="rejectQuote()">
+                Cliente recusou
+              </button>
+              <span class="field-hint">Use apenas se o cliente não conseguiu responder pelo link do e-mail.</span>
+            } @else {
+              <span class="field-hint">
+                A resposta chega pelo link enviado ao cliente. Se ele não conseguir responder,
+                chame o gerente ou o proprietário para registrar a decisão.
+              </span>
+            }
+          }
+          @if (os.quoteStatus === 'APPROVED' && canDecideQuote()) {
+            <button type="button" class="cp-btn cp-btn-secondary" [disabled]="working()" (click)="reopenQuote()">
+              <mat-icon aria-hidden="true">lock_open</mat-icon>
+              Reabrir orçamento
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- linha do tempo -->
+      <section class="cp-card">
+        <h2 class="card-title">Linha do tempo</h2>
+        @if (!history().length) {
+          <p class="empty-note">Nada registrado ainda.</p>
+        } @else {
+          <ol class="timeline">
+            @for (entry of history(); track entry.id) {
+              <li class="timeline-item">
+                <span class="timeline-dot" aria-hidden="true"></span>
+                <div class="timeline-body">
+                  <p class="timeline-title">
+                    @if (entry.fromStatusLabel) {
+                      {{ entry.fromStatusLabel }} → <strong>{{ entry.toStatusLabel }}</strong>
+                    } @else {
+                      <strong>{{ entry.toStatusLabel }}</strong>
+                    }
+                  </p>
+                  <p class="timeline-meta">
+                    {{ entry.changedAt | date: "dd/MM/yyyy 'às' HH:mm" }}
+                    @if (entry.changedBy) { · {{ entry.changedBy }} }
+                  </p>
+                  @if (entry.note) {
+                    <p class="timeline-note">{{ entry.note }}</p>
+                  }
+                </div>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </div>
+
+    <!-- ============================================ coluna lateral -->
+    <div class="side-column">
+      <section class="cp-card">
+        <h2 class="card-title">Veículo e cliente</h2>
+        <dl class="facts">
+          <div><dt>Placa</dt><dd class="plate">{{ os.vehiclePlate }}</dd></div>
+          <div><dt>Veículo</dt><dd>{{ os.vehicleDescription }}</dd></div>
+          <div><dt>Cliente</dt><dd>{{ os.customerName }}</dd></div>
+        </dl>
+        <button type="button" class="cp-btn cp-btn-ghost full" (click)="openVehicleHistory()">
+          <mat-icon aria-hidden="true">history</mat-icon>
+          Ver histórico do veículo
+        </button>
+      </section>
+
+      <section class="cp-card">
+        <header class="card-head">
+          <h2 class="card-title">Atendimento</h2>
+          <button type="button" class="icon-action" (click)="toggleEditDetails()"
+                  [attr.aria-label]="editingDetails() ? 'Cancelar edição' : 'Editar atendimento'">
+            <mat-icon aria-hidden="true">{{ editingDetails() ? 'close' : 'edit' }}</mat-icon>
+          </button>
+        </header>
+
+        @if (!editingDetails()) {
+          <dl class="facts">
+            <div><dt>Mecânico</dt><dd>{{ os.assignedMechanicName || 'A definir' }}</dd></div>
+            <div><dt>Quilometragem</dt><dd>{{ os.mileage != null ? (os.mileage | number: '1.0-0') + ' km' : '—' }}</dd></div>
+            <div>
+              <dt>Previsão de entrega</dt>
+              <dd>{{ os.estimatedDeliveryDate ? (os.estimatedDeliveryDate | date: 'dd/MM/yyyy') : '—' }}</dd>
+            </div>
+            <div><dt>Aberta em</dt><dd>{{ os.openedAt | date: 'dd/MM/yyyy' }}</dd></div>
+          </dl>
+
+          <h3 class="sub-title">Problema relatado</h3>
+          <p class="free-text">{{ os.reportedProblem || 'Nada registrado.' }}</p>
+
+          <h3 class="sub-title">Diagnóstico da oficina</h3>
+          <p class="free-text">{{ os.diagnosis || 'Ainda não preenchido.' }}</p>
+
+          @if (os.notes) {
+            <h3 class="sub-title">Observações internas</h3>
+            <p class="free-text">{{ os.notes }}</p>
+          }
+        } @else {
+          <form [formGroup]="detailsForm" (ngSubmit)="saveDetails()" novalidate>
+            <div class="cp-field">
+              <label class="cp-label" for="mechanic">Mecânico responsável</label>
+              <select id="mechanic" class="cp-select" formControlName="assignedMechanicId">
+                <option [value]="null">A definir</option>
+                @for (mechanic of mechanics(); track mechanic.id) {
+                  <option [value]="mechanic.id">{{ mechanic.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="mileage">Quilometragem</label>
+              <input id="mileage" type="number" min="0" step="1" class="cp-input" formControlName="mileage" />
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="delivery">Previsão de entrega</label>
+              <input id="delivery" type="date" class="cp-input" formControlName="estimatedDeliveryDate" />
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="discount">Desconto (R$)</label>
+              <input id="discount" type="number" min="0" step="0.01" class="cp-input" formControlName="discount" />
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="reported">Problema relatado</label>
+              <textarea id="reported" class="cp-input cp-textarea" formControlName="reportedProblem"></textarea>
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="diagnosis">Diagnóstico da oficina</label>
+              <textarea id="diagnosis" class="cp-input cp-textarea" formControlName="diagnosis"></textarea>
+            </div>
+
+            <div class="cp-field">
+              <label class="cp-label" for="notes">Observações internas</label>
+              <textarea id="notes" class="cp-input cp-textarea" formControlName="notes"></textarea>
+              <span class="field-hint">O cliente não vê este campo.</span>
+            </div>
+
+            <div class="cp-form-actions">
+              <button type="button" class="cp-btn cp-btn-ghost" (click)="toggleEditDetails()">Cancelar</button>
+              <button type="submit" class="cp-btn cp-btn-primary" [disabled]="working()">Salvar</button>
+            </div>
+          </form>
+        }
+      </section>
+    </div>
+  </div>
+}

@@ -1,0 +1,194 @@
+<!--
+  A folha do orçamento. Tudo aqui sai na impressora, menos a barra de ações.
+-->
+<div class="area">
+  @if (loading()) {
+    <p class="carregando">Montando o orçamento…</p>
+  } @else if (!order()) {
+    <div class="folha">
+      <p role="alert">{{ errorMessage() || 'Ordem de serviço não encontrada.' }}</p>
+      <a routerLink="/ordens" class="cp-btn cp-btn-ghost" style="margin-top: 16px">Voltar para a lista</a>
+    </div>
+  } @else {
+    @let os = order()!;
+    @let of_ = workshop();
+    @let cli = customer();
+    @let car = vehicle();
+
+    <!-- ====================================================== ações (não imprime) -->
+    <div class="acoes">
+      <a [routerLink]="['/ordens', os.id]" class="cp-btn cp-btn-ghost">Voltar para a ordem</a>
+      <button type="button" class="cp-btn cp-btn-primary" (click)="print()">Imprimir orçamento</button>
+      <span class="dica">
+        No diálogo de impressão dá para salvar em PDF. Imprima duas vias se quiser deixar uma
+        assinada com a oficina.
+      </span>
+    </div>
+
+    <article class="folha">
+      <!-- =================================================== cabeçalho -->
+      <header class="topo">
+        <div class="oficina">
+          @if (of_?.logoUrl) {
+            <img class="oficina-logo" [src]="of_!.logoUrl" alt="" />
+          }
+          <div class="oficina-dados">
+            <h1 class="oficina-nome">{{ of_?.tradeName || 'Orçamento' }}</h1>
+            @if (of_?.corporateName) {
+              <p class="oficina-linha">{{ of_!.corporateName }}</p>
+            }
+            @if (of_?.cnpj) {
+              <p class="oficina-linha">CNPJ {{ of_!.cnpj }}</p>
+            }
+            @if (of_?.phone || of_?.email) {
+              <p class="oficina-linha">
+                {{ of_!.phone }}@if (of_?.phone && of_?.email) { <span> · </span> }{{ of_!.email }}
+              </p>
+            }
+            @if (formatAddress(of_?.address); as endereco) {
+              <p class="oficina-linha">{{ endereco }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="identificacao">
+          <span class="doc-rotulo">Orçamento</span>
+          <strong class="doc-numero">Nº {{ os.number }}</strong>
+          <span class="doc-situacao">{{ os.quoteStatusLabel }}</span>
+          <span class="doc-emissao">Emitido em {{ emittedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </header>
+
+      <!-- =================================================== cliente e veículo -->
+      <section class="bloco">
+        <h2 class="bloco-titulo">Cliente</h2>
+        <dl class="campos">
+          <div><dt>Nome</dt><dd>{{ cli?.name || os.customerName }}</dd></div>
+          @if (cli?.document) { <div><dt>CPF/CNPJ</dt><dd>{{ cli!.document }}</dd></div> }
+          @if (cli?.phone) { <div><dt>Telefone</dt><dd>{{ cli!.phone }}</dd></div> }
+          @if (cli?.email) { <div><dt>E-mail</dt><dd>{{ cli!.email }}</dd></div> }
+        </dl>
+      </section>
+
+      <section class="bloco">
+        <h2 class="bloco-titulo">Veículo</h2>
+        <dl class="campos">
+          <div><dt>Placa</dt><dd class="destaque">{{ os.vehiclePlate }}</dd></div>
+          <div><dt>Marca e modelo</dt><dd>{{ os.vehicleDescription }}</dd></div>
+          @if (formatYears(car); as anos) { <div><dt>Ano</dt><dd>{{ anos }}</dd></div> }
+          @if (car?.color) { <div><dt>Cor</dt><dd>{{ car!.color }}</dd></div> }
+          @if (os.mileage != null) {
+            <div><dt>Km na entrada</dt><dd>{{ os.mileage | number: '1.0-0' }} km</dd></div>
+          }
+        </dl>
+      </section>
+
+      <!-- =================================================== o que o cliente relatou -->
+      @if (os.reportedProblem) {
+        <section class="bloco">
+          <h2 class="bloco-titulo">O que o cliente relatou</h2>
+          <p class="texto">{{ os.reportedProblem }}</p>
+        </section>
+      }
+
+      <!-- =================================================== itens -->
+      <section class="bloco">
+        <h2 class="bloco-titulo">Serviços e peças propostos</h2>
+
+        @if (!items().length) {
+          <p class="texto">Nenhum item lançado neste orçamento.</p>
+        } @else {
+          <table class="itens">
+            <thead>
+              <tr>
+                <th scope="col">Descrição</th>
+                <th scope="col" class="curta">Tipo</th>
+                <th scope="col" class="num">Qtd.</th>
+                <th scope="col" class="num">Unitário</th>
+                <th scope="col" class="num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr>
+                  <td>{{ item.description }}</td>
+                  <td class="curta">{{ item.typeLabel }}</td>
+                  <td class="num">{{ item.quantity | number: '1.0-2' }}</td>
+                  <td class="num">{{ item.unitPrice | currency: 'BRL' }}</td>
+                  <td class="num">{{ item.totalPrice | currency: 'BRL' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="totais">
+            <div class="linha"><span>Serviços</span><strong>{{ (os.servicesTotal ?? 0) | currency: 'BRL' }}</strong></div>
+            <div class="linha"><span>Peças</span><strong>{{ (os.partsTotal ?? 0) | currency: 'BRL' }}</strong></div>
+            @if (os.discount) {
+              <div class="linha"><span>Desconto</span><strong>− {{ os.discount | currency: 'BRL' }}</strong></div>
+            }
+            <div class="linha total"><span>Total</span><strong>{{ (os.totalAmount ?? 0) | currency: 'BRL' }}</strong></div>
+          </div>
+        }
+      </section>
+
+      @if (os.estimatedDeliveryDate) {
+        <section class="bloco">
+          <h2 class="bloco-titulo">Prazo</h2>
+          <p class="texto">
+            Previsão de entrega em {{ os.estimatedDeliveryDate | date: 'dd/MM/yyyy' }}, contada a
+            partir da aprovação.
+          </p>
+        </section>
+      }
+
+      <!-- =================================================== decisão do cliente -->
+      <section class="bloco decisao evita-quebra">
+        <h2 class="bloco-titulo">Decisão do cliente</h2>
+
+        <p class="termo">
+          Declaro que li este orçamento e
+          <strong>autorizo a execução</strong> dos serviços e peças descritos acima, no valor total de
+          <strong>{{ (os.totalAmount ?? 0) | currency: 'BRL' }}</strong>.
+        </p>
+
+        <!--
+          Duas caixas em vez de uma linha só: recusar precisa ser tão fácil de
+          marcar quanto aprovar. Um documento que só oferece o "sim" pressiona
+          quem está decidindo sobre o próprio dinheiro.
+        -->
+        <div class="opcoes">
+          <span class="opcao"><span class="caixa"></span> Aprovo o orçamento</span>
+          <span class="opcao"><span class="caixa"></span> Não aprovo</span>
+        </div>
+
+        <p class="motivo">
+          <span class="motivo-rotulo">Se não aprovou, o motivo ajuda a oficina a rever a proposta:</span>
+          <span class="risco-longo"></span>
+        </p>
+
+        <div class="linhas">
+          <div class="assinatura">
+            <span class="risco"></span>
+            <span class="quem">Cliente</span>
+            <span class="detalhe">{{ cli?.name || os.customerName }}</span>
+            @if (cli?.document) { <span class="detalhe">CPF/CNPJ {{ cli!.document }}</span> }
+          </div>
+          <div class="assinatura">
+            <span class="risco"></span>
+            <span class="quem">Pela oficina</span>
+            <span class="detalhe">Nome e cargo</span>
+          </div>
+        </div>
+
+        <p class="data-local">Data: ____ / ____ / ________</p>
+      </section>
+
+      <footer class="rodape">
+        Orçamento nº {{ os.number }} · {{ of_?.tradeName || '' }} · emitido em
+        {{ emittedAt | date: 'dd/MM/yyyy HH:mm' }} · a decisão assinada é registrada no sistema pela
+        gerência da oficina
+      </footer>
+    </article>
+  }
+</div>

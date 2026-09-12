@@ -1,0 +1,76 @@
+<cp-page-header [title]="title()" subtitle="Preço e tempo servem de sugestão ao montar a ordem de serviço.">
+  <a routerLink="/servicos" class="cp-btn cp-btn-ghost">Voltar</a>
+</cp-page-header>
+
+<section class="cp-card form-card">
+  @if (loading()) {
+    <cp-skeleton height="24px" width="40%" />
+    <div style="height: 16px"></div>
+    <cp-skeleton height="180px" />
+  } @else {
+    @if (errorMessage()) {
+      <div class="cp-badge cp-badge-canceled" style="margin-bottom: 20px" role="alert">
+        <mat-icon aria-hidden="true" style="font-size: 16px; width: 16px; height: 16px">error_outline</mat-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2 class="form-section-title">Dados do serviço</h2>
+      <p class="form-section-hint">
+        O valor cobrado pode ser ajustado em cada ordem sem alterar o catálogo.
+      </p>
+
+      <div class="cp-form-grid">
+        <div class="cp-field cp-field-full">
+          <label class="cp-label" for="name">Nome</label>
+          <input id="name" type="text" class="cp-input" formControlName="name"
+                 placeholder="Troca de óleo e filtro"
+                 [class.error]="form.controls.name.touched && form.controls.name.invalid" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <span class="cp-error-msg">Informe o nome do serviço.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="defaultPrice">Preço padrão (R$)</label>
+          <input id="defaultPrice" type="number" min="0" step="0.01" class="cp-input"
+                 formControlName="defaultPrice" placeholder="0,00"
+                 [class.error]="form.controls.defaultPrice.touched && form.controls.defaultPrice.invalid" />
+          @if (form.controls.defaultPrice.touched && form.controls.defaultPrice.invalid) {
+            <span class="cp-error-msg">O preço não pode ser negativo.</span>
+          } @else {
+            <span class="field-hint">Deixe em branco se o preço varia caso a caso.</span>
+          }
+        </div>
+
+        <div class="cp-field">
+          <label class="cp-label" for="estimatedMinutes">Tempo estimado (minutos)</label>
+          <input id="estimatedMinutes" type="number" min="0" step="5" class="cp-input"
+                 formControlName="estimatedMinutes" placeholder="60"
+                 [class.error]="form.controls.estimatedMinutes.touched && form.controls.estimatedMinutes.invalid" />
+          @if (form.controls.estimatedMinutes.touched && form.controls.estimatedMinutes.invalid) {
+            <span class="cp-error-msg">Informe um tempo entre 0 e 10080 minutos.</span>
+          } @else {
+            <span class="field-hint">Ajuda a estimar a data de entrega.</span>
+          }
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+
+      <div class="cp-field">
+        <label class="cp-label" for="description">Descrição</label>
+        <textarea id="description" class="cp-input cp-textarea" formControlName="description"
+                  placeholder="O que está incluído, peças previstas, observações para a equipe..."></textarea>
+      </div>
+
+      <div class="cp-form-actions">
+        <a routerLink="/servicos" class="cp-btn cp-btn-ghost">Cancelar</a>
+        <button type="submit" class="cp-btn cp-btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

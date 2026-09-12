@@ -1,0 +1,92 @@
+<cp-page-header
+  title="Tipos de peça"
+  subtitle="O que a peça é — óleo de motor, vela, bobina. É o que permite ver todas as marcas de um mesmo item no estoque.">
+  @if (canManage()) {
+    <a routerLink="/tipos-de-peca/novo" class="cp-btn cp-btn-primary">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Novo tipo
+    </a>
+  }
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por nome ou descrição" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativos</option>
+    <option value="false">Somente inativos</option>
+    <option value="">Todos</option>
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="category"
+      title="Nenhum tipo encontrado"
+      description="Os tipos separam o que a peça é da marca que a fabrica — é o que deixa você ver, de uma vez, todas as marcas de óleo de motor que tem em estoque."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Tipo</th>
+            <th scope="col" class="cp-cell-numeric">Peças</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (type of page().content; track type.id) {
+            <tr [class.inactive-row]="!type.active">
+              <td data-label="Tipo">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ type.name }}</span>
+                  @if (type.description) {
+                    <span class="secondary-text">{{ type.description }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Peças" class="cp-cell-numeric">{{ type.partCount }}</td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="type.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ type.active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  <button type="button" class="icon-action" (click)="edit(type)"
+                          [attr.aria-label]="'Editar ' + type.name">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(type)"
+                          [attr.aria-label]="(type.active ? 'Desativar ' : 'Reativar ') + type.name">
+                    <mat-icon aria-hidden="true">{{ type.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

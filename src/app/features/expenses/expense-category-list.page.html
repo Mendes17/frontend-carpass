@@ -1,0 +1,91 @@
+<cp-page-header
+  title="Categorias de despesa"
+  subtitle="Agrupam os gastos no gráfico do financeiro. Renomear uma categoria muda também os relatórios de meses fechados.">
+  <a routerLink="/despesas" class="cp-btn cp-btn-ghost">Voltar</a>
+  <a routerLink="/despesas/categorias/nova" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Nova categoria
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por nome ou descrição" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onStatusFilter($event)" aria-label="Filtrar por situação">
+    <option value="true" selected>Somente ativas</option>
+    <option value="false">Somente inativas</option>
+    <option value="">Todas</option>
+  </select>
+</div>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="sell"
+      title="Nenhuma categoria encontrada"
+      description="As categorias separam aluguel de peças e de impostos — é o que faz o gráfico de gastos dizer alguma coisa."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Categoria</th>
+            <th scope="col" class="cp-cell-numeric">Lançamentos</th>
+            <th scope="col">Situação</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (categoria of page().content; track categoria.id) {
+            <tr [class.inactive-row]="!categoria.active">
+              <td data-label="Categoria">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ categoria.name }}</span>
+                  @if (categoria.description) {
+                    <span class="secondary-text">{{ categoria.description }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Lançamentos" class="cp-cell-numeric">{{ categoria.expenseCount }}</td>
+              <td data-label="Situação">
+                <span class="cp-badge" [class]="categoria.active ? 'cp-badge-done' : 'cp-badge-neutral'">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  {{ categoria.active ? 'Ativa' : 'Inativa' }}
+                </span>
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  <button type="button" class="icon-action" (click)="edit(categoria)"
+                          [attr.aria-label]="'Editar ' + categoria.name">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action" (click)="toggleStatus(categoria)"
+                          [attr.aria-label]="(categoria.active ? 'Desativar ' : 'Reativar ') + categoria.name">
+                    <mat-icon aria-hidden="true">{{ categoria.active ? 'block' : 'restart_alt' }}</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

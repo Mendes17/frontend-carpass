@@ -1,0 +1,147 @@
+<cp-page-header
+  [title]="firstName() ? 'Olá, ' + firstName() : 'Painel'"
+  subtitle="Como está a operação da sua oficina agora."
+/>
+
+@if (loading()) {
+  <div class="cp-grid cp-grid-stats">
+    @for (placeholder of [1, 2, 3, 4, 5]; track placeholder) {
+      <div class="cp-card"><cp-skeleton height="72px" /></div>
+    }
+  </div>
+} @else if (failed()) {
+  <div class="cp-card">
+    <div class="retry">
+      <mat-icon aria-hidden="true">cloud_off</mat-icon>
+      <p>Não conseguimos carregar os dados do painel.</p>
+      <button type="button" class="cp-btn cp-btn-primary" (click)="load()">Tentar de novo</button>
+    </div>
+  </div>
+} @else if (data(); as dashboard) {
+  <!-- Números soltos: cartão com o valor, não gráfico. -->
+  <div class="cp-grid cp-grid-stats">
+    <cp-stat-tile
+      label="Ordens em aberto"
+      [value]="dashboard.totals.openWorkOrders"
+      icon="build"
+      hint="Ainda na oficina"
+    />
+    <cp-stat-tile label="Clientes" [value]="dashboard.totals.customers" icon="people" />
+    <cp-stat-tile label="Veículos" [value]="dashboard.totals.vehicles" icon="directions_car" />
+    <cp-stat-tile label="Equipe" [value]="dashboard.totals.employees" icon="badge" />
+    <cp-stat-tile
+      label="Peças em falta"
+      [value]="dashboard.totals.lowStockParts"
+      icon="inventory_2"
+      hint="No mínimo ou abaixo"
+      [alert]="dashboard.totals.lowStockParts > 0"
+    />
+  </div>
+
+  <div class="cp-grid cp-grid-2" style="margin-top: 16px">
+    <section class="cp-card panel">
+      <h2 class="section-title">Ordens na oficina</h2>
+      <p class="section-hint">O que está em andamento agora, na sequência do fluxo.</p>
+
+      @if (hasAnyOrder()) {
+        <cp-bar-list [items]="statusBars()" caption="Ordens de serviço em aberto por etapa" />
+
+        <p class="closed-summary">
+          Já encerradas: <strong>{{ closedSummary().delivered }}</strong> entregues e
+          <strong>{{ closedSummary().canceled }}</strong> canceladas.
+        </p>
+      } @else {
+        <cp-empty-state
+          icon="assignment"
+          title="Nenhuma ordem de serviço ainda"
+          description="Quando a primeira OS for aberta, a distribuição por etapa aparece aqui."
+        />
+      }
+    </section>
+
+    <section class="cp-card panel">
+      @if (dashboard.monthRevenue !== null && dashboard.monthRevenue !== undefined) {
+        <h2 class="section-title">Faturamento do mês</h2>
+        <p class="section-hint">Soma das ordens entregues desde o dia 1º.</p>
+
+        <div class="revenue">
+          <strong class="revenue-value">{{ dashboard.monthRevenue | currency: 'BRL' }}</strong>
+          <span class="revenue-label">Considera apenas ordens já entregues.</span>
+        </div>
+      }
+
+      <h2 class="section-title" [style.margin-top]="dashboard.monthRevenue != null ? '28px' : '0'">
+        Serviços mais executados
+      </h2>
+      @if (topServiceBars().length) {
+        <cp-bar-list [items]="topServiceBars()" caption="Serviços mais executados" />
+      } @else {
+        <p class="section-hint" style="margin: 0">Ainda não há serviços executados para ranquear.</p>
+      }
+    </section>
+  </div>
+
+  <div class="cp-grid cp-grid-2" style="margin-top: 16px">
+    <section class="cp-card panel">
+      <h2 class="section-title">Entregas próximas</h2>
+      <p class="section-hint">Previstas para os próximos 7 dias e ainda não entregues.</p>
+
+      @if (dashboard.upcomingDeliveries.length) {
+        <div class="order-list">
+          @for (order of dashboard.upcomingDeliveries; track order.id) {
+            <a class="order-row" [routerLink]="['/ordens', order.id]">
+              <div class="order-main">
+                <span class="order-title">OS #{{ order.number }} · {{ order.vehiclePlate }}</span>
+                <span class="order-meta">{{ order.customerName }} · {{ order.vehicleDescription }}</span>
+              </div>
+              <div class="order-side">
+                <cp-status-badge [label]="order.statusLabel" [tone]="toneOf(order.status)" />
+                <span class="order-date">
+                  {{ order.estimatedDeliveryDate | date: 'dd/MM' }}
+                </span>
+              </div>
+            </a>
+          }
+        </div>
+      } @else {
+        <cp-empty-state
+          icon="event_available"
+          title="Nada com entrega marcada"
+          description="Ordens com data de entrega prevista aparecem aqui quando a data se aproxima."
+        />
+      }
+    </section>
+
+    <section class="cp-card panel">
+      <h2 class="section-title">Últimas ordens</h2>
+      <p class="section-hint">As mais recentes, independente da etapa.</p>
+
+      @if (dashboard.recentOrders.length) {
+        <div class="order-list">
+          @for (order of dashboard.recentOrders; track order.id) {
+            <a class="order-row" [routerLink]="['/ordens', order.id]">
+              <div class="order-main">
+                <span class="order-title">OS #{{ order.number }} · {{ order.vehiclePlate }}</span>
+                <span class="order-meta">
+                  {{ order.customerName }} · aberta em {{ order.openedAt | date: 'dd/MM/yyyy' }}
+                </span>
+              </div>
+              <div class="order-side">
+                <cp-status-badge [label]="order.statusLabel" [tone]="toneOf(order.status)" />
+                @if (order.totalAmount !== null) {
+                  <span class="order-amount">{{ order.totalAmount | currency: 'BRL' }}</span>
+                }
+              </div>
+            </a>
+          }
+        </div>
+      } @else {
+        <cp-empty-state
+          icon="assignment"
+          title="Nenhuma ordem por aqui"
+          description="Abra a primeira ordem de serviço para começar a acompanhar a operação."
+        />
+      }
+    </section>
+  </div>
+}

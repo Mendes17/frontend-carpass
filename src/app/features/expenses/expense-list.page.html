@@ -1,0 +1,129 @@
+<cp-page-header
+  title="Despesas"
+  subtitle="O que sai da oficina. É daqui que o faturamento líquido do painel financeiro se forma.">
+  <a routerLink="/financeiro" class="cp-btn cp-btn-ghost">
+    <mat-icon aria-hidden="true">insights</mat-icon>
+    Ver o financeiro
+  </a>
+  <a routerLink="/despesas/categorias" class="cp-btn cp-btn-ghost">Categorias</a>
+  <a routerLink="/despesas/nova" class="cp-btn cp-btn-primary">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Nova despesa
+  </a>
+</cp-page-header>
+
+<div class="filters">
+  <cp-search-input placeholder="Buscar por descrição ou observação" (search)="onSearch($event)" />
+
+  <select class="cp-select filter-select" (change)="onCategoryFilter($event)"
+          aria-label="Filtrar por categoria">
+    <option value="">Todas as categorias</option>
+    @for (categoria of categories(); track categoria.id) {
+      <option [value]="categoria.id">{{ categoria.name }}</option>
+    }
+  </select>
+
+  <select class="cp-select filter-select" [value]="shortcut()" (change)="onShortcut($event)"
+          aria-label="Filtrar por período">
+    <option value="THIS_MONTH">Este mês</option>
+    <option value="LAST_MONTH">Mês passado</option>
+    <option value="THIS_YEAR">Este ano</option>
+    <option value="ALL">Todo o período</option>
+    <option value="CUSTOM">Datas específicas</option>
+  </select>
+
+  @if (shortcut() === 'CUSTOM') {
+    <input type="date" class="cp-input data-filtro" [value]="query().from ?? ''"
+           (change)="onDateChange('from', $event)" aria-label="Data inicial" />
+    <input type="date" class="cp-input data-filtro" [value]="query().to ?? ''"
+           (change)="onDateChange('to', $event)" aria-label="Data final" />
+  }
+</div>
+
+<!--
+  O total fica acima da tabela porque é a resposta que a pessoa veio buscar; a
+  lista é o detalhe. Ele vem do servidor, calculado sobre o filtro inteiro, e
+  não da soma da página visível.
+-->
+<section class="resumo" role="status">
+  <span class="resumo-rotulo">Total de {{ periodLabel() }}</span>
+  <strong class="resumo-valor">{{ total() | currency: 'BRL' }}</strong>
+  <span class="resumo-contagem">
+    {{ page().totalElements }} {{ page().totalElements === 1 ? 'lançamento' : 'lançamentos' }}
+  </span>
+</section>
+
+<div class="list-card">
+  @if (loading()) {
+    <div class="loading-rows">
+      @for (row of [1, 2, 3, 4, 5]; track row) {
+        <cp-skeleton height="44px" />
+      }
+    </div>
+  } @else if (page().totalElements === 0) {
+    <cp-empty-state
+      icon="receipt_long"
+      title="Nenhuma despesa neste período"
+      description="Lance aluguel, energia, fornecedores e o resto do que sai — é o que transforma faturamento em resultado."
+    />
+  } @else {
+    <div class="cp-table-wrap">
+      <table class="cp-table">
+        <thead>
+          <tr>
+            <th scope="col">Despesa</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Data</th>
+            <th scope="col">Lançada por</th>
+            <th scope="col" class="cp-cell-numeric">Valor</th>
+            <th scope="col"><span class="cp-visually-hidden">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (despesa of page().content; track despesa.id) {
+            <tr>
+              <td data-label="Despesa">
+                <span class="primary-cell">
+                  <span class="primary-text">{{ despesa.description }}</span>
+                  @if (despesa.notes) {
+                    <span class="secondary-text">{{ despesa.notes }}</span>
+                  }
+                </span>
+              </td>
+              <td data-label="Categoria">
+                <span class="cp-badge cp-badge-neutral">{{ despesa.categoryName }}</span>
+              </td>
+              <td data-label="Data">{{ despesa.expenseDate | date: 'dd/MM/yyyy' }}</td>
+              <td data-label="Lançada por">{{ despesa.createdBy || '—' }}</td>
+              <td data-label="Valor" class="cp-cell-numeric valor">
+                {{ despesa.amount | currency: 'BRL' }}
+              </td>
+              <td class="cp-cell-actions">
+                <span class="row-actions">
+                  <button type="button" class="icon-action" (click)="edit(despesa)"
+                          [attr.aria-label]="'Editar ' + despesa.description">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button type="button" class="icon-action perigo" (click)="remove(despesa)"
+                          [attr.aria-label]="'Excluir ' + despesa.description">
+                    <mat-icon aria-hidden="true">delete_outline</mat-icon>
+                  </button>
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <cp-paginator
+      [page]="page().page"
+      [size]="page().size"
+      [totalPages]="page().totalPages"
+      [totalElements]="page().totalElements"
+      [first]="page().first"
+      [last]="page().last"
+      (pageChange)="onPageChange($event)"
+    />
+  }
+</div>

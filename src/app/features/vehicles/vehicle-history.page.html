@@ -1,0 +1,115 @@
+<cp-page-header title="Histórico do veículo" [subtitle]="subtitle()">
+  <a routerLink="/veiculos" class="cp-btn cp-btn-ghost">Voltar</a>
+  <button type="button" class="cp-btn cp-btn-primary" (click)="addRecord()">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    Lançar manutenção externa
+  </button>
+</cp-page-header>
+
+@if (loading()) {
+  <cp-skeleton height="120px" />
+  <div style="height: 16px"></div>
+  <cp-skeleton height="280px" />
+} @else if (!entries().length) {
+  <section class="cp-card">
+    <cp-empty-state
+      icon="history"
+      title="Nenhuma manutenção registrada"
+      description="As ordens de serviço concluídas entram aqui sozinhas. Serviços feitos fora da oficina você pode lançar à mão."
+    />
+  </section>
+} @else {
+  <section class="cp-card summary">
+    <div class="summary-item">
+      <span class="summary-label">Registros</span>
+      <strong class="summary-value">{{ entries().length }}</strong>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Total gasto</span>
+      <strong class="summary-value">{{ totalSpent() | currency: 'BRL' }}</strong>
+    </div>
+    @if (vehicle()?.mileage != null) {
+      <div class="summary-item">
+        <span class="summary-label">Quilometragem atual</span>
+        <strong class="summary-value">{{ vehicle()!.mileage | number: '1.0-0' }} km</strong>
+      </div>
+    }
+  </section>
+
+  <ol class="timeline">
+    @for (entry of entries(); track entry.id) {
+      <li class="entry">
+        <span class="entry-marker" [class.manual]="entry.source === 'MANUAL'" aria-hidden="true">
+          <mat-icon>{{ entry.source === 'MANUAL' ? 'edit_note' : 'receipt_long' }}</mat-icon>
+        </span>
+
+        <article class="cp-card entry-card">
+          <header class="entry-head">
+            <div>
+              <h2 class="entry-title">{{ entry.description }}</h2>
+              <p class="entry-meta">
+                {{ entry.date ? (entry.date | date: 'dd/MM/yyyy') : 'Sem data' }}
+                @if (entry.mileage != null) { · {{ entry.mileage | number: '1.0-0' }} km }
+                @if (entry.performedBy) { · {{ entry.performedBy }} }
+              </p>
+            </div>
+
+            <div class="entry-side">
+              @if (entry.amount != null) {
+                <span class="entry-amount">{{ entry.amount | currency: 'BRL' }}</span>
+              }
+              @if (entry.source === 'WORK_ORDER') {
+                <a class="cp-badge cp-badge-primary entry-link" [routerLink]="['/ordens', entry.workOrderId]">
+                  OS #{{ entry.workOrderNumber }}
+                </a>
+              } @else {
+                <span class="cp-badge cp-badge-neutral">
+                  <span class="cp-badge-dot" aria-hidden="true"></span>
+                  Lançamento manual
+                </span>
+              }
+            </div>
+          </header>
+
+          @if (entry.services.length || entry.parts.length) {
+            <div class="entry-lists">
+              @if (entry.services.length) {
+                <div>
+                  <h3 class="list-title">Serviços</h3>
+                  <ul class="tag-list">
+                    @for (service of entry.services; track service) {
+                      <li>{{ service }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+              @if (entry.parts.length) {
+                <div>
+                  <h3 class="list-title">Peças</h3>
+                  <ul class="tag-list">
+                    @for (part of entry.parts; track part) {
+                      <li>{{ part }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+
+          @if (entry.notes) {
+            <p class="entry-notes">{{ entry.notes }}</p>
+          }
+
+          @if (entry.source === 'MANUAL') {
+            <div class="entry-actions">
+              <button type="button" class="icon-action" (click)="removeRecord(entry)"
+                      [attr.aria-label]="'Remover o lançamento ' + entry.description">
+                <mat-icon aria-hidden="true">delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </article>
+      </li>
+    }
+  </ol>
+}

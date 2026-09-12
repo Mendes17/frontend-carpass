@@ -1,0 +1,76 @@
+<div class="cascata">
+  <div class="cp-field">
+    <label class="cp-label" for="fipeKind">Tipo</label>
+    <select id="fipeKind" class="cp-select" [value]="kind()" (change)="onKindChange($event)">
+      @for (item of kinds; track item.value) {
+        <option [value]="item.value">{{ item.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="cp-field">
+    <label class="cp-label" for="fipeBrand">Marca</label>
+    <select id="fipeBrand" class="cp-select" [value]="brandCode()" (change)="onBrandChange($event)"
+            [disabled]="loading() === 'brands' || !brands().length">
+      <option value="">
+        {{ loading() === 'brands' ? 'Carregando marcas...' : 'Escolha a marca' }}
+      </option>
+      @for (marca of brands(); track marca.code) {
+        <option [value]="marca.code">{{ marca.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="cp-field">
+    <label class="cp-label" for="fipeModel">Modelo e versão</label>
+    <select id="fipeModel" class="cp-select" [value]="modelCode()" (change)="onModelChange($event)"
+            [disabled]="!brandCode() || loading() === 'models'">
+      <option value="">
+        @if (!brandCode()) {
+          Escolha a marca primeiro
+        } @else if (loading() === 'models') {
+          Carregando modelos...
+        } @else {
+          Escolha o modelo
+        }
+      </option>
+      @for (modelo of models(); track modelo.code) {
+        <option [value]="modelo.code">{{ modelo.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="cp-field">
+    <label class="cp-label" for="fipeYear">Ano</label>
+    <select id="fipeYear" class="cp-select" [value]="yearCode()" (change)="onYearChange($event)"
+            [disabled]="!modelCode() || loading() === 'years'">
+      <option value="">
+        @if (!modelCode()) {
+          Escolha o modelo primeiro
+        } @else if (loading() === 'years') {
+          Carregando anos...
+        } @else {
+          Escolha o ano
+        }
+      </option>
+      @for (ano of years(); track ano.code) {
+        <option [value]="ano.code">{{ ano.label }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+@if (loading() === 'detail') {
+  <p class="recado" role="status">Buscando os dados do veículo...</p>
+}
+
+<!--
+  O erro mora aqui dentro e diz a saída: a FIPE fora do ar não pode impedir o
+  cadastro, e o caminho manual continua a um clique.
+-->
+@if (errorMessage()) {
+  <p class="recado erro" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    {{ errorMessage() }}
+  </p>
+}

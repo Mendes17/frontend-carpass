@@ -1,0 +1,100 @@
+<header class="topbar">
+  <button
+    type="button"
+    class="icon-btn menu-btn"
+    (click)="toggleSidebar.emit()"
+    aria-label="Abrir menu de navegação"
+  >
+    <mat-icon aria-hidden="true">menu</mat-icon>
+  </button>
+
+  <!--
+    Só aparece para quem tem vínculo com mais de uma oficina. Com uma só, o
+    seletor seria um controle inerte sugerindo que há algo a escolher.
+  -->
+  @if (canSwitch()) {
+    <button
+      type="button"
+      class="oficina"
+      [matMenuTriggerFor]="workshopMenu"
+      [disabled]="trocando()"
+      aria-label="Trocar de oficina"
+    >
+      <mat-icon class="oficina-icone" aria-hidden="true">storefront</mat-icon>
+      <span class="oficina-nome">{{ workshopName() }}</span>
+      <mat-icon class="oficina-caret" aria-hidden="true">
+        {{ trocando() ? 'hourglass_empty' : 'unfold_more' }}
+      </mat-icon>
+    </button>
+
+    <mat-menu #workshopMenu="matMenu" xPosition="after">
+      <div class="menu-titulo" role="presentation">Trocar de oficina</div>
+      @for (opcao of workshops(); track opcao.workshopId) {
+        <button
+          mat-menu-item
+          type="button"
+          [disabled]="opcao.workshopId === workshopId()"
+          (click)="trocarOficina(opcao)"
+        >
+          <mat-icon aria-hidden="true">
+            {{ opcao.workshopId === workshopId() ? 'check' : 'storefront' }}
+          </mat-icon>
+          <span class="menu-oficina">
+            <span class="menu-oficina-nome">{{ opcao.workshopName }}</span>
+            <span class="menu-oficina-papel">{{ opcao.roleLabel }}</span>
+          </span>
+        </button>
+      }
+
+      <!-- Repetido do menu da conta de propósito: quem está pensando em
+           "oficinas" abre este menu, não o do avatar. -->
+      <a mat-menu-item routerLink="/nova-oficina">
+        <mat-icon aria-hidden="true">add_business</mat-icon>
+        <span>Cadastrar nova oficina</span>
+      </a>
+    </mat-menu>
+  }
+
+  <span class="spacer"></span>
+
+  <button
+    type="button"
+    class="icon-btn"
+    (click)="theme.toggle()"
+    [attr.aria-label]="theme.theme() === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'"
+  >
+    <mat-icon aria-hidden="true">{{ theme.theme() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+  </button>
+
+  @if (user(); as currentUser) {
+    <button type="button" class="account" [matMenuTriggerFor]="accountMenu" aria-label="Abrir menu da conta">
+      <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+      <span class="account-text">
+        <span class="account-name">{{ currentUser.fullName }}</span>
+        <span class="account-role">{{ currentUser.roleLabel }}</span>
+      </span>
+      <mat-icon class="account-caret" aria-hidden="true">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #accountMenu="matMenu" xPosition="before">
+      <a mat-menu-item routerLink="/perfil">
+        <mat-icon aria-hidden="true">person</mat-icon>
+        <span>Meu perfil</span>
+      </a>
+      <!--
+        Fica no menu da conta, e não no da oficina, porque é sobre a PESSOA:
+        de quantas oficinas ela participa. E vale para qualquer papel — o
+        mecânico tem o mesmo direito de abrir a oficina dele que o dono tem de
+        abrir uma segunda unidade.
+      -->
+      <a mat-menu-item routerLink="/nova-oficina">
+        <mat-icon aria-hidden="true">add_business</mat-icon>
+        <span>Cadastrar nova oficina</span>
+      </a>
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        <span>Sair</span>
+      </button>
+    </mat-menu>
+  }
+</header>
